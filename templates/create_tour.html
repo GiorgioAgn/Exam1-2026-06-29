@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Crea Tour | NatureS{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <header class="mb-4 text-center">
+                <p class="section-label mb-2">Guide Dashboard</p>
+                <h1 class="homepage-title mb-3">Pubblica un Tour</h1>
+            </header>
+
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 bg-white">
+                <form action="{{ url_for('create_tour') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Titolo del Tour</label>
+                        <input type="text" name="title" class="form-control rounded-pill bg-light border-0 px-4" required>
+                    </div>
+                    
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label small fw-bold">Punto di Ritrovo</label>
+                            <input type="text" name="meeting_point" class="form-control rounded-pill bg-light border-0 px-4" required>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label small fw-bold">Durata (minuti)</label>
+                            <input type="number" name="duration_mins" class="form-control rounded-pill bg-light border-0 px-4" required value="120">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label class="form-label small fw-bold">Lingua</label>
+                            <select name="language" class="form-select rounded-pill bg-light border-0 px-4" required>
+                                <option value="Italiano">Italiano</option>
+                                <option value="Inglese">Inglese</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label class="form-label small fw-bold">Max Partecipanti</label>
+                            <input type="number" name="max_partecipants" class="form-control rounded-pill bg-light border-0 px-4" required value="15">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Tappe Previste</label>
+                        <input type="text" name="stops" class="form-control rounded-pill bg-light border-0 px-4" required placeholder="Es: Mole, Piazza Castello">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold">Descrizione Completa</label>
+                        <textarea name="description" class="form-control rounded-4 bg-light border-0 p-3" rows="4" minlength="30" required></textarea>
+                    </div>
+
+                    <div class="mb-4 p-3 bg-light rounded-4 border border-2 border-dashed">
+                        <label class="form-label small fw-bold">Immagine Copertina del Tour</label>
+                        <input type="file" name="photo1" class="form-control rounded-pill border-0" accept="image/*">
+                    </div>
+
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 fw-bold">Pubblica Tour</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

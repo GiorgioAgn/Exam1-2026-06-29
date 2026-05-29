@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% block title %}{{ tour.title }} | NatureS{% endblock %}
+
+{% block extra_css %}
+<link href="{{ url_for('static', filename='assets/css/post-hiking-1.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-dark fw-bold">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('hiking') }}" class="text-dark fw-bold">Tours</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ tour.title }}</li>
+        </ol>
+    </nav>
+
+    <article>
+        <header class="mb-4 mb-lg-5">
+            <p class="section-label mb-2">Hiking trail</p>
+            <h1 class="homepage-title mb-3">{{ tour.title }}</h1>
+            <p class="homepage-text mb-3">Guida: {{ guide.first_name }} {{ guide.last_name }} • {{ tour.duration_mins }} min • {{ tour.language }}</p>
+        </header>
+
+        <section class="post-hero mb-4 rounded-4 overflow-hidden" style="background-image: url('{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-ridge.jpg') }}'); min-height: 400px; position: relative;">
+            <div class="post-hero-overlay p-4 p-lg-5 d-flex flex-column justify-content-end h-100" style="background: linear-gradient(transparent, rgba(20, 61, 41, 0.8));">
+                <p class="section-label mb-2 text-white">Ritrovo</p>
+                <h2 class="h3 mb-1 text-white">{{ tour.meeting_point }}</h2>
+            </div>
+        </section>
+
+        <div class="row g-5">
+            <div class="col-lg-7">
+                <section class="post-content mb-5">
+                    <h2 class="h5 fw-bold">Overview</h2>
+                    <p style="white-space: pre-wrap;">{{ tour.description }}</p>
+                    <h3 class="h6 mt-4 fw-bold">Route details</h3>
+                    <ul>
+                        <li>Tappe previste: {{ tour.stops }}</li>
+                    </ul>
+                </section>
+
+                <section class="comments pt-4 border-top">
+                    <h3 class="h5 fw-bold mb-4">Comments & Reviews</h3>
+                    
+                    {% if current_user.is_authenticated %}
+                    <div class="mb-5 p-4 bg-light rounded-4 border shadow-sm">
+                        <form action="{{ url_for('tour_detail', id=tour.id) }}" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="action_type" value="comment">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Valutazione</label>
+                                <select name="rating" class="form-select rounded-pill border-0" required>
+                                    <option value="5">5 Stelle - Eccellente</option>
+                                    <option value="4">4 Stelle - Molto Buono</option>
+                                    <option value="3">3 Stelle - Nella Media</option>
+                                    <option value="2">2 Stelle - Scarso</option>
+                                    <option value="1">1 Stella - Pessimo</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <textarea name="text" class="form-control rounded-4 border-0" rows="3" required placeholder="Lascia un commento..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Allega foto (opzionale)</label>
+                                <input type="file" name="comment_image" class="form-control rounded-pill border-0" accept="image/*">
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="anonymous" id="anonCheck">
+                                    <label class="form-check-label small text-muted" for="anonCheck">Invia in anonimo</label>
+                                </div>
+                                <button type="submit" class="btn btn-dark rounded-pill px-4">Invia</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% else %}
+                        <div class="alert alert-light border rounded-4 mb-5 text-center">
+                            Per commentare devi <a href="{{ url_for('login') }}" class="fw-bold text-dark">Accedere</a>.
+                        </div>
+                    {% endif %}
+
+                    {% if comments %}
+                        {% for c in comments %}
+                        <div class="mb-4 pb-4 border-bottom d-flex gap-3">
+                            <img class="avatar rounded-circle" src="{{ url_for('static', filename='assets/img/user2.png') }}" style="width:45px; height:45px;" alt="User">
+                            <div>
+                                <h6 class="mb-1 fw-bold">{% if c.first_name %}{{ c.first_name }}{% else %}Anonimo{% endif %} <span class="badge bg-secondary ms-2">{{ c.rating }}/5</span></h6>
+                                <p class="small text-muted mb-2">{{ c.publication_date }}</p>
+                                <p class="mb-2">{{ c.text }}</p>
+                                {% if c.comment_image %}
+                                    <img src="{{ c.comment_image }}" class="img-fluid rounded-4 mt-2" style="max-height: 150px;" alt="Foto recensione">
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="small text-muted">Nessun commento ancora. Sii il primo a condividere la tua esperienza!</p>
+                    {% endif %}
+                </section>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-lg rounded-4 position-sticky bg-white p-4" style="top: 100px;">
+                    <h3 class="h5 fw-bold mb-4 text-center">Prenota il Tour</h3>
+                    {% if current_user.is_authenticated and current_user.role == 'participant' %}
+                    <form action="{{ url_for('tour_detail', id=tour.id) }}" method="POST">
+                        <input type="hidden" name="action_type" value="booking">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Seleziona Data</label>
+                            <input type="date" name="tour_date" class="form-control rounded-pill bg-light border-0 px-3" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Partecipanti (Max 4)</label>
+                            <input type="number" name="num_people" class="form-control rounded-pill bg-light border-0 px-3" min="1" max="4" value="1" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Nomi accompagnatori (opzionale)</label>
+                            <textarea name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Conferma Prenotazione</button>
+                    </form>
+                    {% else %}
+                        <div class="alert alert-light border rounded-4 text-center">
+                            Per prenotare devi accedere come Partecipante.<br>
+                            <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-dark rounded-pill mt-3">Accedi</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </article>
+</main>
+{% endblock %}

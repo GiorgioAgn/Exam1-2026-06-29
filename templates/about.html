@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Chi Siamo | NatureS{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-3 px-lg-5 py-5 d-flex align-items-center justify-content-center">
+    <div class="card border-0 shadow-sm rounded-4 p-5 text-center" style="max-width: 600px; width: 100%;">
+        <span class="logo-icon mb-3 mx-auto" style="font-size: 3rem; color: var(--nature-forest);"><i class="bi bi-tree-fill"></i></span>
+        <h1 class="homepage-title mb-4">Chi Siamo</h1>
+        <p class="text-muted mb-4 fs-5">
+            NatureS è la piattaforma nata da un progetto universitario per connettere guide esperte e appassionati di escursioni. 
+            Esplora la natura, trova i percorsi migliori e unisciti alla nostra community!
+        </p>
+        <a href="{{ url_for('hiking') }}" class="btn btn-dark rounded-pill px-4 py-2">Esplora i Tour</a>
+    </div>
+</main>
+{% endblock %}

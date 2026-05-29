@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Registrati | NatureS{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-3 px-lg-5 py-5 d-flex align-items-center justify-content-center">
+    <div class="col-md-6 col-lg-5"> 
+        <div class="card border-0 shadow-sm rounded-4 p-5">
+            <div class="text-center mb-4">
+                <h2 class="homepage-title">Crea Account</h2>
+            </div>
+            <form action="{{ url_for('register') }}" method="POST">
+                <div class="row g-2 mb-3">
+                    <div class="col">
+                        <input type="text" name="first_name" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Nome" required>
+                    </div>
+                    <div class="col">
+                        <input type="text" name="last_name" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Cognome" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <input type="email" name="email" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Email" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" name="password" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Password" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold">Tipo Utente</label>
+                    <select name="role" id="roleSelect" class="form-select rounded-pill bg-light border-0 px-4 py-2" onchange="toggleLanguages()">
+                        <option value="participant">Partecipante (Prenota i tour)</option>
+                        <option value="guide">Guida Turistica (Crea i tour)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4 d-none" id="languagesField">
+                    <label class="form-label small fw-bold">Lingue parlate</label>
+                    <input type="text" name="languages" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Es: Italiano, Inglese">
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Registrati</button>
+            </form>
+            <p class="text-center mt-4 mb-0 text-muted small">Hai già un account? <a href="{{ url_for('login') }}" class="text-dark fw-bold">Accedi</a></p>
+        </div>
+    </div>
+</main>
+
+<script>
+function toggleLanguages() {
+    var role = document.getElementById('roleSelect').value;
+    var field = document.getElementById('languagesField');
+    if (role === 'guide') {
+        field.classList.remove('d-none');
+    } else {
+        field.classList.add('d-none');
+    }
+}
+</script>
+{% endblock %}

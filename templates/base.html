@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}NatureS | Outdoor Social Network{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='assets/css/style.css') }}" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body>
+    <header class="sticky-top">
+      <nav class="navbar navbar-expand-lg py-3">
+        <div class="container-fluid px-3 px-lg-5">
+            
+          <div class="navbar-desktop d-none d-lg-grid align-items-center">
+            <a class="nav-link" href="{{ url_for('index') }}">Home</a>
+            <a class="nav-link" href="{{ url_for('about') }}">Chi Siamo</a> <form class="search-box m-0" role="search" action="{{ url_for('hiking') }}">
+              <div class="input-group rounded-pill overflow-hidden">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input class="form-control" type="search" placeholder="Cerca tour..." aria-label="Search trails">
+              </div>
+            </form>
+
+            <a class="navbar-brand natures-logo d-flex align-items-center gap-2 m-0" href="{{ url_for('index') }}">
+              <span class="logo-icon"><i class="bi bi-tree-fill"></i></span>
+              <span>NatureS</span>
+            </a>
+
+            {% if current_user.is_authenticated and current_user.role == 'guide' %}
+              <a class="nav-link nav-guides fw-bold text-success" href="{{ url_for('create_tour') }}">Crea Tour</a>
+            {% else %}
+              <a class="nav-link nav-guides" href="{{ url_for('hiking') }}">Tours</a>
+            {% endif %}
+
+            <div class="dropdown user-dropdown justify-self-end">
+              <button class="btn p-0 border-0 rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Apri menu utente">
+                <img class="avatar rounded-circle" src="{{ url_for('static', filename='assets/img/user1.png') }}" alt="User avatar">
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end mt-2">
+                {% if current_user.is_authenticated %}
+                  <li><a class="dropdown-item fw-bold" href="#">Ciao, {{ current_user.first_name }}</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Esci</a></li>
+                {% else %}
+                  <li><a class="dropdown-item" href="{{ url_for('login') }}">Accedi</a></li>
+                  <li><a class="dropdown-item" href="{{ url_for('register') }}">Registrati</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+
+          <div class="navbar-mobile d-lg-none">
+            <div class="mobile-topbar">
+              <div class="mobile-left d-flex align-items-center gap-2">
+                <button class="icon-button" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavMobile" aria-controls="mainNavMobile" aria-expanded="false">
+                  <i class="bi bi-list fs-4"></i>
+                </button>
+              </div>
+
+              <a class="navbar-brand natures-logo mobile-brand d-flex align-items-center gap-2 m-0" href="{{ url_for('index') }}">
+                <span class="logo-icon"><i class="bi bi-tree-fill"></i></span>
+                <span>NatureS</span>
+              </a>
+
+              <div class="dropdown mobile-right">
+                <button class="btn p-0 border-0 rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <img class="avatar rounded-circle" src="{{ url_for('static', filename='assets/img/user1.png') }}" alt="User avatar">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end mt-2">
+                  {% if current_user.is_authenticated %}
+                    <li><a class="dropdown-item fw-bold" href="#">Ciao, {{ current_user.first_name }}</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}">Esci</a></li>
+                  {% else %}
+                    <li><a class="dropdown-item" href="{{ url_for('login') }}">Accedi</a></li>
+                    <li><a class="dropdown-item" href="{{ url_for('register') }}">Registrati</a></li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+
+            <div class="collapse navbar-collapse mt-3" id="mainNavMobile">
+              <ul class="navbar-nav text-center gap-2">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('about') }}">Chi Siamo</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('hiking') }}">Tours</a></li>
+                {% if current_user.is_authenticated and current_user.role == 'guide' %}
+                  <li class="nav-item"><a class="nav-link text-success fw-bold" href="{{ url_for('create_tour') }}">Crea Tour</a></li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container mt-2">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    {% block content %}
+    {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
