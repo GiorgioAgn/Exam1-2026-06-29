@@ -35,7 +35,7 @@
             {% if tours %}
                 {% for tour in tours %}
                 <div class="col-12 col-sm-6">
-                  <a class="hike-card" href="/tour/{{ tour.id }}" style="background-image: url('{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-forest.jpg') }}')">
+                  <a class="hike-card" href="/tour/{{ tour.id }}" style="background-image: url(&quot;{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-forest.jpg') }}&quot;)">
                     <div class="hike-caption">
                       <span class="hike-likes badge rounded-pill text-bg-dark">Max {{ tour.max_partecipants }} px</span>
                       <h3>{{ tour.title }}</h3>

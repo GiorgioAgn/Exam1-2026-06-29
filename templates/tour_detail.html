@@ -22,7 +22,7 @@
             <p class="homepage-text mb-3">Guida: {{ guide.first_name }} {{ guide.last_name }} • {{ tour.duration_mins }} min • {{ tour.language }}</p>
         </header>
 
-        <section class="post-hero mb-4 rounded-4 overflow-hidden" style="background-image: url('{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-ridge.jpg') }}'); min-height: 400px; position: relative;">
+        <section class="post-hero mb-4 rounded-4 overflow-hidden" style="background-image: url(&quot;{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-ridge.jpg') }}&quot;); min-height: 400px; position: relative;">
             <div class="post-hero-overlay p-4 p-lg-5 d-flex flex-column justify-content-end h-100" style="background: linear-gradient(transparent, rgba(20, 61, 41, 0.8));">
                 <p class="section-label mb-2 text-white">Ritrovo</p>
                 <h2 class="h3 mb-1 text-white">{{ tour.meeting_point }}</h2>
