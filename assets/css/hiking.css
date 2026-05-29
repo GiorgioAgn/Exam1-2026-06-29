@@ -1,0 +1,151 @@
+main .section-label { 
+  color: var(--nature-forest); 
+  font-size: 0.8rem; 
+  font-weight: 800; 
+  letter-spacing: 0.08rem; 
+  text-transform: uppercase; 
+}
+
+main h1, main h2, main h3 { 
+  color: var(--nature-forest-dark); 
+  font-weight: 800; 
+  letter-spacing: -0.06rem; }
+
+.hike-toolbar .nav-link {
+  padding: 0.55rem 1rem;
+  color: var(--nature-forest-dark);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(31, 95, 59, 0.12);
+}
+
+.hike-toolbar .nav-link:hover {
+  color: var(--nature-forest-dark);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.hike-toolbar .nav-link.active {
+  color: var(--nature-white);
+  background: var(--nature-forest);
+  border-color: var(--nature-forest);
+}
+
+.hiking-sidebar .accordion-item {
+  border: 1px solid rgba(31, 95, 59, 0.14);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow: var(--nature-shadow);
+}
+
+.hiking-sidebar .accordion-item + .accordion-item {
+  margin-top: 12px;
+}
+
+.hiking-sidebar .accordion-button {
+  background: transparent;
+  box-shadow: none;
+  color: var(--nature-forest-dark);
+  font-weight: 800;
+}
+
+.hiking-sidebar .accordion-button:not(.collapsed) {
+  color: var(--nature-forest-dark);
+  background: rgba(31, 95, 59, 0.08);
+}
+
+.hiking-sidebar .accordion-button::after {
+  background-size: 0.9rem;
+}
+
+.hiking-sidebar .list-group-item {
+  background: transparent;
+  border-color: rgba(31, 95, 59, 0.1);
+  color: var(--nature-text);
+}
+
+.hiking-sidebar .list-group-item:hover {
+  background: rgba(31, 95, 59, 0.05);
+}
+
+.hike-card {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: 18px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 4px 12px rgba(20, 61, 41, 0.12);
+  transition: transform .15s ease;
+}
+.hike-card:hover { transform: translateY(-3px); }
+
+.hike-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(20,61,41,0.1) 0%, rgba(20,61,41,0.6) 100%);
+}
+
+.hike-caption {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 14px;
+  z-index: 2;
+  color: var(--nature-white);
+}
+
+.hike-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.hike-likes {
+  width: fit-content;
+  padding: 0.5rem 0.75rem;
+  background: rgba(20, 61, 41, 0.62) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.02rem;
+}
+
+.hike-caption h3 { margin: 0; font-size: 1.15rem; font-weight:800; }
+
+.hike-desc {
+  position: absolute;
+  top: 0;
+  right: -320px;
+  width: 300px;
+  height: 100%;
+  background: rgba(31, 95, 59, 0.85);
+  color: var(--nature-white);
+  padding: 18px;
+  z-index: 3;
+  transition: right .15s ease, opacity .15s ease;
+  opacity: 0;
+}
+.hike-card:hover .hike-desc { right: 0; opacity: 1; }
+
+@media (max-width: 767px) {
+  .hike-card { height: 320px; }
+  .hike-desc {
+    right: 0;
+    left: 0;
+    top: -100%;
+    width: 100%;
+    height: auto;
+    transform: translateY(-12px);
+    opacity: 0;
+    transition: transform .15s ease, opacity .15s ease;
+  }
+  .hike-card:hover .hike-desc { transform: translateY(0); opacity: 1; top: 0; }
+  .hike-caption { bottom: 16px; }
+}
+
+@media (min-width: 992px) {
+  .hike-card { height: 240px; border-radius: 22px; }
+}

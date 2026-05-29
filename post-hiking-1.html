@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Post | NatureS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="assets/css/style.css" rel="stylesheet">
+    <link href="assets/css/post-hiking-1.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <header class="sticky-top">
+      <nav class="navbar navbar-expand-lg py-3">
+        <div class="container-fluid px-3 px-lg-5">
+            <div class="navbar-desktop d-none d-lg-grid align-items-center">
+            <a class="nav-link active" href="index.html">Home</a>
+
+            <form class="search-box m-0" role="search">
+              <div class="input-group rounded-pill overflow-hidden">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input class="form-control" type="search" placeholder="Search trails" aria-label="Search trails">
+              </div>
+            </form>
+
+            <a class="navbar-brand natures-logo d-flex align-items-center gap-2 m-0" href="index.html">
+              <span class="logo-icon"><i class="bi bi-tree-fill"></i></span>
+              <span>NatureS</span>
+            </a>
+
+            <a class="nav-link nav-guides" href="#">Guides</a>
+
+            <div class="dropdown user-dropdown justify-self-end">
+              <button class="btn p-0 border-0 rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
+                <img class="avatar rounded-circle" src="assets/img/user1.png" alt="User avatar">
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end mt-2">
+                <li><a class="dropdown-item" href="#">Profile</a></li>
+                <li><a class="dropdown-item" href="#">Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#">Log out</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="navbar-mobile d-lg-none">
+            <div class="mobile-topbar">
+              <div class="mobile-left d-flex align-items-center gap-2">
+                <button class="icon-button" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavMobile" aria-controls="mainNavMobile" aria-expanded="false" aria-label="Toggle navigation">
+                  <i class="bi bi-list fs-4"></i>
+                </button>
+                <button class="icon-button" type="button" aria-label="Open search">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+
+              <a class="navbar-brand natures-logo mobile-brand d-flex align-items-center gap-2 m-0" href="index.html">
+                <span class="logo-icon"><i class="bi bi-tree-fill"></i></span>
+                <span>NatureS</span>
+              </a>
+
+              <div class="dropdown mobile-right">
+                <button class="btn p-0 border-0 rounded-circle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open user menu">
+                  <img class="avatar rounded-circle" src="assets/img/user1.png" alt="User avatar">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end mt-2">
+                  <li><a class="dropdown-item" href="#">Profile</a></li>
+                  <li><a class="dropdown-item" href="#">Settings</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item" href="#">Log out</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="collapse navbar-collapse mt-3" id="mainNavMobile">
+              <ul class="navbar-nav text-center gap-2">
+                <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Guides</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+          <li class="breadcrumb-item"><a href="hiking.html">Hiking</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Sunrise loop</li>
+        </ol>
+      </nav>
+
+      <article>
+        <header class="mb-4 mb-lg-5">
+          <p class="section-label mb-2">Hiking trail</p>
+          <h1 class="homepage-title mb-3">Sunrise loop</h1>
+          <p class="homepage-text mb-3">April 20, 2026 • 8 km • 450 m ascent • Intermediate</p>
+        </header>
+
+        <section class="post-hero mb-4" style="background-image: url('assets/img/trail-ridge.jpg')">
+          <div class="post-hero-overlay">
+            <div class="container px-0">
+              <p class="section-label mb-2 text-white">Featured trail</p>
+              <h2 class="h4 mb-1">Sunrise loop</h2>
+              <p class="small mb-0">April 20, 2026 • 8 km • 450 m ascent</p>
+              <div class="post-like-wrap">
+                <button type="button" class="btn btn-outline-warning btn-sm rounded-pill d-inline-flex align-items-center gap-2" aria-label="Like this trail">
+                  <i class="bi bi-star"></i>
+                  Like
+                </button>
+                <span class="badge rounded-pill text-bg-warning text-dark">128 likes</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="post-content mb-5">
+          <h2 class="h5">Overview</h2>
+          <p>This scenic loop starts in the valley and climbs through mixed woodland to an open ridge with wide views. Expect some rocky sections and a short scramble near the summit.</p>
+
+          <h3 class="h6 mt-4">Route details</h3>
+          <ul>
+            <li>Distance: 8 km</li>
+            <li>Ascent: 450 m</li>
+            <li>Estimated time: 3–4 hours</li>
+          </ul>
+        </section>
+
+        <section class="comments">
+          <h3 class="h6">Comments</h3>
+          <p class="small text-muted">No comments yet! Be the first to share tips!</p>
+        </section>
+      </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

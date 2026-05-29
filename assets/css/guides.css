@@ -1,0 +1,113 @@
+.guides-page {
+	color: var(--nature-text);
+}
+
+.guides-hero {
+	padding-top: 24px;
+}
+
+.guide-category-title {
+	margin-bottom: 18px;
+}
+
+.guide-category-title h2 {
+	color: var(--nature-forest-dark);
+	font-weight: 800;
+	letter-spacing: -0.05rem;
+}
+
+.guide-card {
+	position: relative;
+	height: 100%;
+	min-height: 210px;
+	padding: 24px;
+	border: 1px solid rgba(31, 95, 59, 0.16);
+	border-radius: 26px;
+	background: rgba(255, 255, 255, 0.7);
+	box-shadow: var(--nature-shadow);
+	transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+}
+
+.guide-card:hover,
+.guide-card:focus-within {
+	transform: translateY(-3px);
+	border-color: rgba(31, 95, 59, 0.28);
+	background: rgba(255, 255, 255, 0.88);
+	box-shadow: 0 22px 48px rgba(20, 61, 41, 0.16);
+}
+
+.guide-card-kicker {
+	display: inline-block;
+	margin-bottom: 16px;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: rgba(31, 95, 59, 0.08);
+	color: var(--nature-forest);
+	font-size: 0.78rem;
+	font-weight: 800;
+	letter-spacing: 0.04rem;
+	text-transform: uppercase;
+}
+
+.guide-card h3 {
+	margin: 0 0 10px;
+	color: var(--nature-forest-dark);
+	font-size: 1.35rem;
+	font-weight: 800;
+	letter-spacing: -0.04rem;
+}
+
+.guide-card p {
+	max-width: 32ch;
+	margin: 0;
+	color: #55635a;
+	line-height: 1.6;
+}
+
+.guide-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 18px;
+	color: var(--nature-forest);
+	font-weight: 700;
+}
+
+.guide-link:hover {
+	color: var(--nature-forest-dark);
+}
+
+.guides-nav .nav-link {
+	padding: 0.55rem 1rem;
+	color: var(--nature-forest-dark);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.58);
+	border: 1px solid rgba(31, 95, 59, 0.12);
+}
+
+.guides-nav .nav-link:hover {
+	color: var(--nature-forest-dark);
+	background: rgba(255, 255, 255, 0.82);
+}
+
+.guides-nav .nav-link.active {
+	color: var(--nature-white);
+	background: var(--nature-forest);
+	border-color: var(--nature-forest);
+}
+
+@media (max-width: 576px) {
+	.guides-hero {
+		padding-top: 12px;
+	}
+
+	.guide-card {
+		min-height: 180px;
+		padding: 20px;
+		border-radius: 22px;
+	}
+
+	.guide-card h3 {
+		font-size: 1.2rem;
+	}
+}
