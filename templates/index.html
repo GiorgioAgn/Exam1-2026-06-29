@@ -1,109 +1,97 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
-      <section>
-        <h1 class="visually-hidden">NatureS homepage</h1>
-      </section>
-      <section class="homepage-intro mb-4 mb-lg-5">
-        <div class="row align-items-end g-4">
-          <div class="col-lg-8">
-            <p class="section-label mb-2">Outdoor social network</p>
-            <h1 class="homepage-title mb-0">
-              Find your next adventure.
-            </h1>
-          </div>
-        
-          <div class="col-lg-4">
-            <p class="homepage-text mb-0">
-              Explore hiking, trekking, kayaking and mountain activities with the NatureS community.
-            </p>
-          </div>
-        </div>
-      </section>
+<main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+  <section class="homepage-intro mb-4 mb-lg-5">
+    <div class="row align-items-end g-4">
+      <div class="col-lg-8">
+        <p class="section-label mb-2">Free walking tours a Siracusa</p>
+        <h1 class="homepage-title mb-0">Scopri la citta passo dopo passo.</h1>
+      </div>
 
-      <section class="home-highlights mb-4 mb-lg-5" aria-labelledby="highlights-title">
-        <div class="d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-          <h2 id="highlights-title" class="h4 fw-bold mb-0">Weekly highlights</h2>
-        </div>
+      <div class="col-lg-4">
+        <p class="homepage-text mb-0">
+          Tour gratuiti con guide locali: storia, miti greci, vicoli di Ortigia,
+          mercati e affacci sul mare.
+        </p>
+      </div>
+    </div>
+  </section>
 
-        <div class="row row-cols-1 row-cols-md-3 g-3 g-lg-4">
-          <div class="col">
-            <article class="card h-100 border-0 shadow-sm">
-              <div class="card-body">
-                <span class="badge rounded-pill text-bg-success mb-3"><i class="bi bi-geo-alt me-1"></i>New routes</span>
-                <h3 class="h5 fw-bold">Fresh trails to try</h3>
-                <p class="text-body-secondary mb-0">A curated mix of easy loops and day hikes added by the community this week.</p>
-              </div>
-            </article>
-          </div>
+  <section class="home-highlights mb-4 mb-lg-5" aria-labelledby="highlights-title">
+    <div class="d-flex justify-content-between align-items-center mb-3 mb-lg-4">
+      <h2 id="highlights-title" class="h4 fw-bold mb-0">Come funziona</h2>
+      <a class="btn btn-sm btn-outline-success rounded-pill" href="{{ url_for('hiking') }}">Vedi tutti</a>
+    </div>
 
-          <div class="col">
-            <article class="card h-100 border-0 shadow-sm">
-              <div class="card-body">
-                <span class="badge rounded-pill text-bg-info mb-3"><i class="bi bi-people me-1"></i>Community</span>
-                <h3 class="h5 fw-bold">Meet nearby hikers</h3>
-                <p class="text-body-secondary mb-0">Find people planning the same trail, swap advice and share gear tips.</p>
-              </div>
-            </article>
+    <div class="row row-cols-1 row-cols-md-3 g-3 g-lg-4">
+      <div class="col">
+        <article class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <span class="badge rounded-pill text-bg-success mb-3"><i class="bi bi-map me-1"></i>Esplora</span>
+            <h3 class="h5 fw-bold">Tour visibili a tutti</h3>
+            <p class="text-body-secondary mb-0">Consulta programmi, foto, tappe, lingua e orari anche senza account.</p>
           </div>
+        </article>
+      </div>
 
-          <div class="col">
-            <article class="card h-100 border-0 shadow-sm">
-              <div class="card-body">
-                <span class="badge rounded-pill text-bg-warning text-dark mb-3"><i class="bi bi-bookmark-heart me-1"></i>Saved</span>
-                <h3 class="h5 fw-bold">Your bookmarked ideas</h3>
-                <p class="text-body-secondary mb-0">Keep track of routes, notes and future plans in one compact overview.</p>
-              </div>
-            </article>
+      <div class="col">
+        <article class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <span class="badge rounded-pill text-bg-info mb-3"><i class="bi bi-calendar-check me-1"></i>Prenota</span>
+            <h3 class="h5 fw-bold">Posti controllati per data</h3>
+            <p class="text-body-secondary mb-0">Scegli una data disponibile e prenota per te o fino a tre accompagnatori.</p>
           </div>
+        </article>
+      </div>
+
+      <div class="col">
+        <article class="card h-100 border-0 shadow-sm">
+          <div class="card-body">
+            <span class="badge rounded-pill text-bg-warning text-dark mb-3"><i class="bi bi-person-badge me-1"></i>Guide</span>
+            <h3 class="h5 fw-bold">Guide con agenda reale</h3>
+            <p class="text-body-secondary mb-0">Le guide pubblicano tour solo quando non hanno sovrapposizioni.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="tours-title">
+    <div class="d-flex justify-content-between align-items-center mb-3 mb-lg-4">
+      <h2 id="tours-title" class="h4 fw-bold mb-0">Tour in evidenza</h2>
+    </div>
+
+    <div class="row g-3 g-lg-4">
+      {% for tour in tours %}
+        <div class="col-12 col-md-6 col-xl-4">
+          <article class="tour-preview-card">
+            <a href="{{ url_for('tour_detail', id=tour.id) }}" class="tour-preview-media">
+              <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
+              <span class="category-badge">{{ tour.language }}</span>
+            </a>
+            <div class="tour-preview-body">
+              <p class="section-label mb-1">{{ tour.theme }}</p>
+              <h3 class="h5 fw-bold mb-2">{{ tour.title }}</h3>
+              <p class="small text-muted mb-2">
+                <i class="bi bi-person-badge me-1"></i>
+                {{ tour.guide_first_name }} {{ tour.guide_last_name }}
+              </p>
+              <p class="small text-muted mb-3">
+                <i class="bi bi-clock me-1"></i>{{ tour.duration_mins }} min
+                <span class="mx-1">/</span>
+                <i class="bi bi-calendar-week me-1"></i>{{ tour.schedule_label }}
+              </p>
+              <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('tour_detail', id=tour.id) }}">Dettagli</a>
+            </div>
+          </article>
         </div>
-      </section>
-    
-      <section aria-labelledby="categories-title">
-        <div class="d-flex justify-content-between align-items-center mb-3 mb-lg-4">
-          <h2 id="categories-title" class="h4 fw-bold mb-0">
-            Explore activities
-          </h2>
+      {% else %}
+        <div class="col">
+          <p class="text-muted">Nessun tour disponibile al momento.</p>
         </div>
-      
-        <div class="row g-3 g-lg-4">
-          <div class="col-12 col-sm-6 col-lg-4">
-            <article>
-              <a class="category-card" href="/hiking">
-                <img src="{{ url_for('static', filename='assets/img/category-hiking.jpg') }}" alt="Hikers walking in the mountains">
-                <div class="category-overlay">
-                  <span class="category-badge">Popular</span>
-                  <h3>Hiking</h3>
-                </div>
-              </a>
-            </article>
-          </div>
-        
-          <div class="col-12 col-sm-6 col-lg-4">
-            <article>
-              <a class="category-card" href="#">
-                <img src="{{ url_for('static', filename='assets/img/category-trekking.jpg') }}" alt="Tent in the mountains">
-                <div class="category-overlay">
-                  <span class="category-badge">Mountain</span>
-                  <h3>Trekking</h3>
-                </div>
-              </a>
-            </article>
-          </div>
-        
-          <div class="col-12 col-sm-6 col-lg-4">
-            <article>
-              <a class="category-card" href="#">
-                <img src="{{ url_for('static', filename='assets/img/category-orienteering.jpg') }}" alt="Compass on a map">
-                <div class="category-overlay">
-                  <span class="category-badge">Navigation</span>
-                  <h3>Orienteering</h3>
-                </div>
-              </a>
-            </article>
-          </div>
-        </div>
-      </section>
-    </main>
+      {% endfor %}
+    </div>
+  </section>
+</main>
 {% endblock %}

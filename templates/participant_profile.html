@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Profilo Partecipante | NatureS Siracusa{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+  <header class="mb-4 mb-lg-5">
+    <p class="section-label mb-2">Profilo partecipante</p>
+    <h1 class="homepage-title mb-3">Le tue prenotazioni</h1>
+    <p class="homepage-text mb-0 text-muted">
+      Qui trovi date, orari, punto di ritrovo, persone incluse e stato di ogni prenotazione.
+    </p>
+  </header>
+
+  <section class="profile-list">
+    {% for reservation in reservations %}
+      <article class="profile-card">
+        <div class="profile-card-main">
+          <div>
+            <p class="section-label mb-1">{{ reservation.language }}</p>
+            <h2 class="h4 fw-bold mb-2">{{ reservation.title }}</h2>
+            <p class="mb-1">
+              <i class="bi bi-calendar-event me-1"></i>
+              {{ reservation.tour_date }} alle {{ reservation.start_time }}
+            </p>
+            <p class="mb-1">
+              <i class="bi bi-geo-alt me-1"></i>
+              {{ reservation.meeting_point }}
+            </p>
+            <p class="mb-1">
+              <i class="bi bi-person-badge me-1"></i>
+              Guida: {{ reservation.guide_first_name }} {{ reservation.guide_last_name }}
+            </p>
+            <p class="mb-0">
+              <i class="bi bi-people me-1"></i>
+              {{ reservation.num_people }} persone
+              {% if reservation.extra_names %}
+                / {{ reservation.extra_names }}
+              {% endif %}
+            </p>
+          </div>
+          <div class="profile-card-actions">
+            {% if reservation.status == 'booked' %}
+              <span class="badge text-bg-success rounded-pill p-2">Prenotata</span>
+            {% else %}
+              <span class="badge text-bg-secondary rounded-pill p-2">Annullata</span>
+            {% endif %}
+
+            {% if reservation.can_cancel %}
+              <form action="{{ url_for('cancel_reservation', reservation_id=reservation.id) }}" method="POST">
+                <button class="btn btn-outline-danger rounded-pill px-4" type="submit">Annulla</button>
+              </form>
+            {% elif reservation.status == 'booked' %}
+              <span class="small text-muted">Annullamento non disponibile</span>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state">
+        <h2 class="h5 fw-bold">Nessuna prenotazione</h2>
+        <p class="text-muted mb-3">Scegli un tour e prenota una data disponibile.</p>
+        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('hiking') }}">Esplora tour</a>
+      </div>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

@@ -1,81 +1,113 @@
 {% extends 'base.html' %}
 
+{% block title %}Tour | NatureS Siracusa{% endblock %}
+
 {% block extra_css %}
 <link href="{{ url_for('static', filename='assets/css/hiking.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-    <main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Hiking</li>
-        </ol>
-      </nav>
+<main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Tours</li>
+    </ol>
+  </nav>
 
-      <header class="mb-4 mb-lg-5">
-        <p class="section-label mb-2">Category</p>
-        <h1 class="homepage-title mb-4">Hikings</h1>
-        <p class="homepage-text mb-0 text-muted">Latest trails, tips and community posts about hiking.</p>
-      </header>
+  <header class="mb-4 mb-lg-5">
+    <p class="section-label mb-2">Siracusa</p>
+    <h1 class="homepage-title mb-4">Free Walking Tours</h1>
+    <p class="homepage-text mb-0 text-muted">
+      Scegli una data, una durata o una lingua e trova il tour giusto per la tua visita.
+    </p>
+  </header>
 
-      <nav class="hike-toolbar mb-4" aria-label="Trail filters">
-        <ul class="nav nav-pills flex-wrap gap-2">
-          <li class="nav-item"><a class="nav-link active" href="#">All</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Easy</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Intermediate</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Advanced</a></li>
-        </ul>
-      </nav>
-
-      <div class="row g-4">
-        <div class="col-lg-8">
-          <div class="row hike-grid g-3">
-            
-            {% if tours %}
-                {% for tour in tours %}
-                <div class="col-12 col-sm-6">
-                  <a class="hike-card" href="/tour/{{ tour.id }}" style="background-image: url(&quot;{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-forest.jpg') }}&quot;)">
-                    <div class="hike-caption">
-                      <span class="hike-likes badge rounded-pill text-bg-dark">Max {{ tour.max_partecipants }} px</span>
-                      <h3>{{ tour.title }}</h3>
-                    </div>
-                    <div class="hike-desc">
-                      <p class="mb-1">{{ tour.duration_mins }} min • {{ tour.language }}</p>
-                      <p class="small text-muted">Guida: {{ tour.first_name }} {{ tour.last_name }}</p>
-                    </div>
-                  </a>
+  <div class="row g-4">
+    <aside class="col-lg-4 order-lg-2">
+      <div class="accordion hiking-sidebar" id="hikingSidebar">
+        <div class="accordion-item">
+          <h2 class="accordion-header" id="hikingFiltersHeading">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hikingFilters" aria-expanded="true" aria-controls="hikingFilters">
+              Filtri
+            </button>
+          </h2>
+          <div id="hikingFilters" class="accordion-collapse collapse show" aria-labelledby="hikingFiltersHeading" data-bs-parent="#hikingSidebar">
+            <div class="accordion-body">
+              <form action="{{ url_for('hiking') }}" method="get" class="filter-form">
+                <div class="mb-3">
+                  <label class="form-label small fw-bold" for="q">Cerca</label>
+                  <input class="form-control rounded-pill bg-light border-0 px-4" id="q" name="q" type="search" value="{{ filters.q }}" placeholder="Titolo o tema">
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>Nessun hike disponibile al momento.</p>
-            {% endif %}
-            </div>
-        </div>
 
-        <aside class="col-lg-4">
-          <div class="accordion hiking-sidebar" id="hikingSidebar">
-            <div class="accordion-item">
-              <h2 class="accordion-header" id="hikingFiltersHeading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hikingFilters" aria-expanded="true" aria-controls="hikingFilters">
-                  Filters
-                </button>
-              </h2>
-              <div id="hikingFilters" class="accordion-collapse collapse show" aria-labelledby="hikingFiltersHeading" data-bs-parent="#hikingSidebar">
-                <div class="accordion-body">
-                  <div class="d-flex flex-wrap gap-2 mb-3">
-                    <span class="badge rounded-pill text-bg-success">All</span>
-                    <span class="badge rounded-pill text-bg-light text-dark border">Easy</span>
-                    <span class="badge rounded-pill text-bg-light text-dark border">Family</span>
-                    <span class="badge rounded-pill text-bg-light text-dark border">Weekend</span>
-                  </div>
-                  <p class="small text-muted mb-0">Difficulty: <strong>All</strong></p>
-                  <p class="small text-muted mb-0">Distance: <strong>Any</strong></p>
+                <div class="mb-3">
+                  <label class="form-label small fw-bold" for="date">Data</label>
+                  <input class="form-control rounded-pill bg-light border-0 px-4" id="date" name="date" type="date" value="{{ filters.date }}">
                 </div>
-              </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-bold" for="duration">Durata</label>
+                  <select class="form-select rounded-pill bg-light border-0 px-4" id="duration" name="duration">
+                    <option value="">Qualsiasi durata</option>
+                    {% for key, option in DURATION_FILTERS.items() %}
+                      <option value="{{ key }}" {% if filters.duration == key %}selected{% endif %}>{{ option[0] }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label small fw-bold" for="language">Lingua</label>
+                  <select class="form-select rounded-pill bg-light border-0 px-4" id="language" name="language">
+                    <option value="">Tutte le lingue</option>
+                    {% for language in LANGUAGES %}
+                      <option value="{{ language }}" {% if filters.language == language %}selected{% endif %}>{{ language }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button class="btn btn-dark rounded-pill px-4" type="submit">Applica</button>
+                  <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('hiking') }}">Reset</a>
+                </div>
+              </form>
             </div>
           </div>
-        </aside>
+        </div>
       </div>
-    </main>
+    </aside>
+
+    <div class="col-lg-8 order-lg-1">
+      <div class="row hike-grid g-3">
+        {% for tour in tours %}
+          <div class="col-12 col-sm-6">
+            <a class="hike-card" href="{{ url_for('tour_detail', id=tour.id) }}">
+              <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
+              <div class="hike-caption">
+                <span class="hike-likes badge rounded-pill text-bg-dark">
+                  {{ tour.language }} / max {{ tour.max_participants }}
+                </span>
+                <h3>{{ tour.title }}</h3>
+              </div>
+              <div class="hike-desc">
+                <p class="mb-1">{{ tour.duration_mins }} min / {{ tour.theme }}</p>
+                <p class="small mb-2">Guida: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
+                <p class="small mb-0">{{ tour.schedule_label }}</p>
+                {% if filters.date and tour.selected_seats_left is not none %}
+                  <p class="small mt-2 mb-0 fw-bold">{{ tour.selected_seats_left }} posti rimasti</p>
+                {% endif %}
+              </div>
+            </a>
+          </div>
+        {% else %}
+          <div class="col-12">
+            <div class="empty-state">
+              <h2 class="h5 fw-bold">Nessun tour trovato</h2>
+              <p class="text-muted mb-0">Prova a cambiare data, lingua o durata.</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</main>
 {% endblock %}

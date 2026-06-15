@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block title %}Profilo Guida | NatureS Siracusa{% endblock %}
+
+{% block content %}
+<main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
+  <header class="mb-4 mb-lg-5">
+    <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+      <div>
+        <p class="section-label mb-2">Profilo guida</p>
+        <h1 class="homepage-title mb-3">I tuoi tour</h1>
+        <p class="homepage-text mb-0 text-muted">
+          Controlla prenotazioni, partecipanti attesi e report post-tour.
+        </p>
+      </div>
+      <div class="align-self-lg-end">
+        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('create_tour') }}">
+          <i class="bi bi-plus-lg me-1"></i>Nuovo tour
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <section class="profile-list">
+    {% for tour in tours %}
+      <article class="profile-card">
+        <div class="profile-card-main">
+          <div>
+            <p class="section-label mb-1">{{ tour.language }} / {{ tour.theme }}</p>
+            <h2 class="h4 fw-bold mb-2">{{ tour.title }}</h2>
+            <p class="mb-1"><i class="bi bi-calendar-week me-1"></i>{{ tour.schedule_label }}</p>
+            <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>{{ tour.meeting_point }}</p>
+            <p class="mb-0"><i class="bi bi-people me-1"></i>Capienza: {{ tour.max_participants }}</p>
+          </div>
+          <div class="profile-card-actions">
+            <a class="btn btn-outline-dark rounded-pill px-4" href="{{ url_for('tour_detail', id=tour.id) }}">Apri</a>
+            {% if tour.can_edit %}
+              <a class="btn btn-outline-success rounded-pill px-4" href="{{ url_for('edit_tour', id=tour.id) }}">Modifica</a>
+            {% else %}
+              <span class="badge text-bg-secondary rounded-pill p-2">Modifica bloccata</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="reservation-block mt-4">
+          <h3 class="h6 fw-bold mb-3">Prenotazioni per data</h3>
+          {% for group in tour.reservation_dates %}
+            <section class="reservation-date">
+              <div class="reservation-date-head">
+                <div>
+                  <p class="mb-1 fw-bold">{{ group.date }} alle {{ group.start_time }}</p>
+                  <p class="small text-muted mb-0">
+                    {{ group.reservation_count }} prenotazioni / {{ group.people_count }} partecipanti attesi
+                  </p>
+                </div>
+                {% if group.report %}
+                  <span class="badge text-bg-success rounded-pill p-2">Report inviato: {{ group.report.actual_participants }} presenti</span>
+                {% elif group.can_report %}
+                  <span class="badge text-bg-warning text-dark rounded-pill p-2">Report richiesto</span>
+                {% else %}
+                  <span class="badge text-bg-light text-dark border rounded-pill p-2">In programma</span>
+                {% endif %}
+              </div>
+
+              <div class="table-responsive mt-3">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Partecipante</th>
+                      <th>Email</th>
+                      <th>Persone</th>
+                      <th>Accompagnatori</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for reservation in group.reservations %}
+                      <tr>
+                        <td>{{ reservation.first_name }} {{ reservation.last_name }}</td>
+                        <td>{{ reservation.email }}</td>
+                        <td>{{ reservation.num_people }}</td>
+                        <td>{{ reservation.extra_names or '-' }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              {% if group.can_report %}
+                <form class="report-form mt-3" action="{{ url_for('submit_report', tour_id=tour.id, tour_date=group.date) }}" method="POST" enctype="multipart/form-data">
+                  <div class="row g-2 align-items-end">
+                    <div class="col-md-4">
+                      <label class="form-label small fw-bold" for="actual{{ tour.id }}{{ loop.index }}">Partecipanti effettivi</label>
+                      <input id="actual{{ tour.id }}{{ loop.index }}" class="form-control rounded-pill bg-light border-0 px-3" type="number" name="actual_participants" min="0" max="{{ group.people_count }}" value="{{ group.report.actual_participants if group.report else group.people_count }}" required>
+                    </div>
+                    <div class="col-md-5">
+                      <label class="form-label small fw-bold" for="evidence{{ tour.id }}{{ loop.index }}">Foto prova</label>
+                      <input id="evidence{{ tour.id }}{{ loop.index }}" class="form-control rounded-pill border-0" type="file" name="evidence_photo" accept="image/*" required>
+                    </div>
+                    <div class="col-md-3 d-grid">
+                      <button class="btn btn-dark rounded-pill" type="submit">Salva report</button>
+                    </div>
+                  </div>
+                </form>
+              {% endif %}
+            </section>
+          {% else %}
+            <p class="small text-muted mb-0">Nessuna prenotazione ricevuta per questo tour.</p>
+          {% endfor %}
+        </div>
+      </article>
+    {% else %}
+      <div class="empty-state">
+        <h2 class="h5 fw-bold">Non hai ancora pubblicato tour</h2>
+        <p class="text-muted mb-3">Crea il primo itinerario guidato per Siracusa.</p>
+        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('create_tour') }}">Crea tour</a>
+      </div>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}

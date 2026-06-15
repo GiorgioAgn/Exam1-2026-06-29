@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ tour.title }} | NatureS{% endblock %}
+{% block title %}{{ tour.title }} | NatureS Siracusa{% endblock %}
 
 {% block extra_css %}
 <link href="{{ url_for('static', filename='assets/css/post-hiking-1.css') }}" rel="stylesheet">
@@ -7,127 +7,213 @@
 
 {% block content %}
 <main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-dark fw-bold">Home</a></li>
-            <li class="breadcrumb-item"><a href="{{ url_for('hiking') }}" class="text-dark fw-bold">Tours</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{{ tour.title }}</li>
-        </ol>
-    </nav>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('hiking') }}">Tours</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ tour.title }}</li>
+    </ol>
+  </nav>
 
-    <article>
-        <header class="mb-4 mb-lg-5">
-            <p class="section-label mb-2">Hiking trail</p>
-            <h1 class="homepage-title mb-3">{{ tour.title }}</h1>
-            <p class="homepage-text mb-3">Guida: {{ guide.first_name }} {{ guide.last_name }} • {{ tour.duration_mins }} min • {{ tour.language }}</p>
-        </header>
+  <article>
+    <header class="mb-4 mb-lg-5">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span class="section-label">Free walking tour</span>
+        <span class="badge text-bg-success">Guida</span>
+        <span class="badge text-bg-light text-dark border">{{ tour.language }}</span>
+      </div>
+      <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
+        <div>
+          <h1 class="homepage-title mb-3">{{ tour.title }}</h1>
+          <p class="homepage-text mb-0">
+            {{ tour.theme }} / {{ tour.duration_mins }} min / max {{ tour.max_participants }} partecipanti
+          </p>
+        </div>
+        {% if current_user.is_authenticated and current_user.role == 'guide' and current_user.id|int == tour.guide_id %}
+          <div class="tour-owner-actions">
+            {% if tour.can_edit %}
+              <a class="btn btn-outline-success rounded-pill px-4" href="{{ url_for('edit_tour', id=tour.id) }}">
+                <i class="bi bi-pencil me-1"></i>Modifica
+              </a>
+            {% else %}
+              <span class="badge text-bg-secondary rounded-pill p-3">Modifica bloccata: ci sono prenotazioni</span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </header>
 
-        <section class="post-hero mb-4 rounded-4 overflow-hidden" style="background-image: url(&quot;{{ tour.photo1 if tour.photo1 else url_for('static', filename='assets/img/trail-ridge.jpg') }}&quot;); min-height: 400px; position: relative;">
-            <div class="post-hero-overlay p-4 p-lg-5 d-flex flex-column justify-content-end h-100" style="background: linear-gradient(transparent, rgba(20, 61, 41, 0.8));">
-                <p class="section-label mb-2 text-white">Ritrovo</p>
-                <h2 class="h3 mb-1 text-white">{{ tour.meeting_point }}</h2>
+    <section class="post-hero mb-4">
+      <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
+      <div class="post-hero-overlay">
+        <p class="section-label mb-2">Punto di ritrovo</p>
+        <h2>{{ tour.meeting_point }}</h2>
+        <p class="mb-0">Guida: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
+      </div>
+    </section>
+
+    <div class="row g-5">
+      <div class="col-lg-7">
+        <section class="post-content mb-5">
+          <h2 class="h5 fw-bold">Descrizione</h2>
+          <p class="pre-wrap">{{ tour.description }}</p>
+
+          <div class="info-grid my-4">
+            <div>
+              <span class="section-label">Schedule</span>
+              <p class="mb-0">{{ tour.schedule_label }}</p>
             </div>
+            <div>
+              <span class="section-label">Lingua</span>
+              <p class="mb-0">{{ tour.language }}</p>
+            </div>
+            <div>
+              <span class="section-label">Durata</span>
+              <p class="mb-0">{{ tour.duration_mins }} minuti</p>
+            </div>
+            <div>
+              <span class="section-label">Capienza</span>
+              <p class="mb-0">{{ tour.max_participants }} persone</p>
+            </div>
+          </div>
+
+          <h3 class="h6 mt-4 fw-bold">Tappe previste</h3>
+          <ol class="stops-list">
+            {% for stop in stops %}
+              <li>{{ stop.name }}</li>
+            {% endfor %}
+          </ol>
         </section>
 
-        <div class="row g-5">
-            <div class="col-lg-7">
-                <section class="post-content mb-5">
-                    <h2 class="h5 fw-bold">Overview</h2>
-                    <p style="white-space: pre-wrap;">{{ tour.description }}</p>
-                    <h3 class="h6 mt-4 fw-bold">Route details</h3>
-                    <ul>
-                        <li>Tappe previste: {{ tour.stops }}</li>
-                    </ul>
-                </section>
+        <section class="gallery-section mb-5" aria-labelledby="gallery-title">
+          <h2 id="gallery-title" class="h5 fw-bold mb-3">Foto promozionali</h2>
+          <div class="tour-gallery">
+            {% for photo in photos %}
+              <img src="{{ photo.path }}" alt="Foto {{ loop.index }} di {{ tour.title }}">
+            {% endfor %}
+          </div>
+        </section>
 
-                <section class="comments pt-4 border-top">
-                    <h3 class="h5 fw-bold mb-4">Comments & Reviews</h3>
-                    
-                    {% if current_user.is_authenticated %}
-                    <div class="mb-5 p-4 bg-light rounded-4 border shadow-sm">
-                        <form action="{{ url_for('tour_detail', id=tour.id) }}" method="POST" enctype="multipart/form-data">
-                            <input type="hidden" name="action_type" value="comment">
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Valutazione</label>
-                                <select name="rating" class="form-select rounded-pill border-0" required>
-                                    <option value="5">5 Stelle - Eccellente</option>
-                                    <option value="4">4 Stelle - Molto Buono</option>
-                                    <option value="3">3 Stelle - Nella Media</option>
-                                    <option value="2">2 Stelle - Scarso</option>
-                                    <option value="1">1 Stella - Pessimo</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <textarea name="text" class="form-control rounded-4 border-0" rows="3" required placeholder="Lascia un commento..."></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold">Allega foto (opzionale)</label>
-                                <input type="file" name="comment_image" class="form-control rounded-pill border-0" accept="image/*">
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="anonymous" id="anonCheck">
-                                    <label class="form-check-label small text-muted" for="anonCheck">Invia in anonimo</label>
-                                </div>
-                                <button type="submit" class="btn btn-dark rounded-pill px-4">Invia</button>
-                            </div>
-                        </form>
-                    </div>
-                    {% else %}
-                        <div class="alert alert-light border rounded-4 mb-5 text-center">
-                            Per commentare devi <a href="{{ url_for('login') }}" class="fw-bold text-dark">Accedere</a>.
-                        </div>
-                    {% endif %}
+        <section class="comments pt-4 border-top">
+          <h2 class="h5 fw-bold mb-4">Commenti</h2>
 
-                    {% if comments %}
-                        {% for c in comments %}
-                        <div class="mb-4 pb-4 border-bottom d-flex gap-3">
-                            <img class="avatar rounded-circle" src="{{ url_for('static', filename='assets/img/user2.png') }}" style="width:45px; height:45px;" alt="User">
-                            <div>
-                                <h6 class="mb-1 fw-bold">{% if c.first_name %}{{ c.first_name }}{% else %}Anonimo{% endif %} <span class="badge bg-secondary ms-2">{{ c.rating }}/5</span></h6>
-                                <p class="small text-muted mb-2">{{ c.publication_date }}</p>
-                                <p class="mb-2">{{ c.text }}</p>
-                                {% if c.comment_image %}
-                                    <img src="{{ c.comment_image }}" class="img-fluid rounded-4 mt-2" style="max-height: 150px;" alt="Foto recensione">
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}
-                        <p class="small text-muted">Nessun commento ancora. Sii il primo a condividere la tua esperienza!</p>
-                    {% endif %}
-                </section>
+          {% if current_user.is_authenticated %}
+            <form class="comment-form mb-5 p-4 bg-light rounded-4 border shadow-sm" action="{{ url_for('add_comment', id=tour.id) }}" method="POST">
+              <label class="form-label small fw-bold" for="commentText">Aggiungi un commento</label>
+              <textarea id="commentText" name="text" class="form-control rounded-4 border-0" rows="3" minlength="2" maxlength="600" required></textarea>
+              <button type="submit" class="btn btn-dark rounded-pill px-4 mt-3">Pubblica</button>
+            </form>
+          {% else %}
+            <div class="alert alert-light border rounded-4 mb-5 text-center">
+              Per commentare devi
+              <a href="{{ url_for('login', next=request.path) }}" class="fw-bold text-dark">accedere</a>.
             </div>
+          {% endif %}
 
-            <div class="col-lg-5">
-                <div class="card border-0 shadow-lg rounded-4 position-sticky bg-white p-4" style="top: 100px;">
-                    <h3 class="h5 fw-bold mb-4 text-center">Prenota il Tour</h3>
-                    {% if current_user.is_authenticated and current_user.role == 'participant' %}
-                    <form action="{{ url_for('tour_detail', id=tour.id) }}" method="POST">
-                        <input type="hidden" name="action_type" value="booking">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Seleziona Data</label>
-                            <input type="date" name="tour_date" class="form-control rounded-pill bg-light border-0 px-3" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold">Partecipanti (Max 4)</label>
-                            <input type="number" name="num_people" class="form-control rounded-pill bg-light border-0 px-3" min="1" max="4" value="1" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold">Nomi accompagnatori (opzionale)</label>
-                            <textarea name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="2"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Conferma Prenotazione</button>
-                    </form>
-                    {% else %}
-                        <div class="alert alert-light border rounded-4 text-center">
-                            Per prenotare devi accedere come Partecipante.<br>
-                            <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-dark rounded-pill mt-3">Accedi</a>
-                        </div>
-                    {% endif %}
+          {% for comment in comments %}
+            <article class="comment-item mb-4 pb-4 border-bottom d-flex gap-3">
+              <img class="avatar rounded-circle comment-avatar" src="{{ url_for('static', filename='assets/img/user2.png') }}" alt="Avatar">
+              <div>
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                  <h3 class="h6 fw-bold mb-0">{{ comment.first_name }} {{ comment.last_name }}</h3>
+                  {% if comment.role == 'guide' %}
+                    <span class="badge text-bg-success">Guida</span>
+                  {% else %}
+                    <span class="badge text-bg-info">Partecipante</span>
+                  {% endif %}
+                  {% if comment.user_id == tour.guide_id %}
+                    <span class="badge text-bg-warning text-dark">Autore del tour</span>
+                  {% endif %}
                 </div>
+                <p class="small text-muted mb-2">{{ comment.publication_date }}</p>
+                <p class="mb-0">{{ comment.text }}</p>
+              </div>
+            </article>
+          {% else %}
+            <p class="small text-muted">Non ci sono ancora commenti.</p>
+          {% endfor %}
+        </section>
+      </div>
+
+      <aside class="col-lg-5">
+        <section class="booking-card card border-0 shadow-lg rounded-4 bg-white p-4">
+          <h2 class="h5 fw-bold mb-4 text-center">Prenota il Tour</h2>
+
+          {% if not current_user.is_authenticated %}
+            <div class="alert alert-light border rounded-4 text-center">
+              Accedi come partecipante per prenotare una data disponibile.
+              <div class="d-grid gap-2 mt-3">
+                <a href="{{ url_for('login', next=request.path) }}" class="btn btn-dark rounded-pill">Accedi</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-dark rounded-pill">Registrati</a>
+              </div>
             </div>
-        </div>
-    </article>
+          {% elif current_user.role != 'participant' %}
+            <div class="alert alert-light border rounded-4 text-center">
+              Le guide non possono prenotare con un account guida. Puoi creare un profilo partecipante separato con la stessa email.
+            </div>
+          {% elif upcoming_dates %}
+            <form action="{{ url_for('book_tour', id=tour.id) }}" method="POST">
+              <div class="mb-3">
+                <label class="form-label small fw-bold" for="tourDate">Data disponibile</label>
+                <select id="tourDate" name="tour_date" class="form-select rounded-pill bg-light border-0 px-3" required>
+                  {% for item in upcoming_dates %}
+                    <option value="{{ item.date_iso }}" data-seats="{{ item.seats_left }}" {% if item.seats_left <= 0 %}disabled{% endif %}>
+                      {{ item.weekday }} {{ item.date_iso }} alle {{ item.start_time }} / {{ item.seats_left }} posti
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-bold" for="numPeople">Persone nella prenotazione</label>
+                <input id="numPeople" type="number" name="num_people" class="form-control rounded-pill bg-light border-0 px-3" min="1" max="4" value="1" required>
+                <p class="small text-muted mt-2 mb-0" id="seatHint">Il sistema controlla i posti rimasti prima di confermare.</p>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label small fw-bold" for="extraNames">Nomi accompagnatori</label>
+                <textarea id="extraNames" name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="3" placeholder="Un nome per ogni accompagnatore, separati da virgola o a capo"></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Conferma Prenotazione</button>
+            </form>
+          {% else %}
+            <div class="alert alert-light border rounded-4 text-center">
+              Nessuna data prenotabile nei prossimi 60 giorni.
+            </div>
+          {% endif %}
+        </section>
+      </aside>
+    </div>
+  </article>
 </main>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const dateSelect = document.getElementById('tourDate');
+  const peopleInput = document.getElementById('numPeople');
+  const seatHint = document.getElementById('seatHint');
+
+  function syncSeatLimit() {
+    if (!dateSelect || !peopleInput) {
+      return;
+    }
+    const option = dateSelect.options[dateSelect.selectedIndex];
+    const seats = Number(option.dataset.seats || 0);
+    const maxPeople = Math.max(1, Math.min(4, seats));
+    peopleInput.max = String(maxPeople);
+    if (Number(peopleInput.value) > maxPeople) {
+      peopleInput.value = String(maxPeople);
+    }
+    if (seatHint) {
+      seatHint.textContent = `${seats} posti disponibili per la data selezionata.`;
+    }
+  }
+
+  if (dateSelect) {
+    dateSelect.addEventListener('change', syncSeatLimit);
+    syncSeatLimit();
+  }
+</script>
 {% endblock %}

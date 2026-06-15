@@ -1,22 +1,40 @@
 {% extends 'base.html' %}
-{% block title %}Accedi | NatureS{% endblock %}
+{% block title %}Accedi | NatureS Siracusa{% endblock %}
 
 {% block content %}
-<main class="container-fluid px-3 px-lg-5 py-5 d-flex align-items-center justify-content-center" style="min-height: 70vh;">
-    <div class="card border-0 shadow-sm rounded-4 p-5" style="max-width: 400px; width: 100%;">
-        <div class="text-center mb-4">
-            <h2 class="homepage-title">Bentornato</h2>
-        </div>
-        <form action="{{ url_for('login') }}" method="POST">
-            <div class="mb-3">
-                <input type="email" name="email" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Email" required>
-            </div>
-            <div class="mb-4">
-                <input type="password" name="password" class="form-control rounded-pill bg-light border-0 px-4 py-2" placeholder="Password" required>
-            </div>
-            <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Accedi</button>
-        </form>
-        <p class="text-center mt-4 mb-0 text-muted small">Non hai un account? <a href="{{ url_for('register') }}" class="text-dark fw-bold">Registrati</a></p>
+<main class="auth-page container-fluid px-3 px-lg-5 py-5 d-flex align-items-center justify-content-center">
+  <section class="auth-card card border-0 shadow-sm rounded-4 p-4 p-lg-5">
+    <div class="text-center mb-4">
+      <p class="section-label mb-2">Bentornato</p>
+      <h1 class="auth-title mb-0">Accedi</h1>
     </div>
+
+    <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
+      <div class="mb-3">
+        <label class="form-label small fw-bold" for="email">Email</label>
+        <input id="email" type="email" name="email" class="form-control rounded-pill bg-light border-0 px-4 py-2" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label small fw-bold" for="password">Password</label>
+        <input id="password" type="password" name="password" class="form-control rounded-pill bg-light border-0 px-4 py-2" minlength="6" required>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label small fw-bold" for="role">Tipo account</label>
+        <select id="role" name="role" class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
+          <option value="participant">Partecipante</option>
+          <option value="guide">Guida</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Accedi</button>
+    </form>
+
+    <p class="text-center mt-4 mb-0 text-muted small">
+      Non hai un account?
+      <a href="{{ url_for('register') }}" class="text-dark fw-bold">Registrati</a>
+    </p>
+  </section>
 </main>
 {% endblock %}
