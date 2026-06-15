@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ tour.title }} | NatureS Siracusa{% endblock %}
+{% block title %}{{ tour.title }} | Free Walking Tour Siracusa{% endblock %}
 
 {% block extra_css %}
 <link href="{{ url_for('static', filename='assets/css/post-hiking-1.css') }}" rel="stylesheet">
@@ -19,24 +19,30 @@
     <header class="mb-4 mb-lg-5">
       <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
         <span class="section-label">Free walking tour</span>
-        <span class="badge text-bg-success">Guida</span>
+        <span class="badge text-bg-success">Guide</span>
         <span class="badge text-bg-light text-dark border">{{ tour.language }}</span>
       </div>
       <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
         <div>
           <h1 class="homepage-title mb-3">{{ tour.title }}</h1>
           <p class="homepage-text mb-0">
-            {{ tour.theme }} / {{ tour.duration_mins }} min / max {{ tour.max_participants }} partecipanti
+            {{ tour.theme }} / {{ tour.duration_mins }} min / max {{ tour.max_participants }} participants
           </p>
+          <form class="like-form mt-3" action="{{ url_for('toggle_like', id=tour.id) }}" method="POST">
+            <button class="btn {% if tour.is_liked %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill px-4" type="submit">
+              <i class="bi {% if tour.is_liked %}bi-heart-fill{% else %}bi-heart{% endif %} me-1"></i>
+              {{ tour.like_count }} like
+            </button>
+          </form>
         </div>
         {% if current_user.is_authenticated and current_user.role == 'guide' and current_user.id|int == tour.guide_id %}
           <div class="tour-owner-actions">
             {% if tour.can_edit %}
               <a class="btn btn-outline-success rounded-pill px-4" href="{{ url_for('edit_tour', id=tour.id) }}">
-                <i class="bi bi-pencil me-1"></i>Modifica
+                <i class="bi bi-pencil me-1"></i>Edit
               </a>
             {% else %}
-              <span class="badge text-bg-secondary rounded-pill p-3">Modifica bloccata: ci sono prenotazioni</span>
+              <span class="badge text-bg-secondary rounded-pill p-3">Editing locked: reservations exist</span>
             {% endif %}
           </div>
         {% endif %}
@@ -46,16 +52,16 @@
     <section class="post-hero mb-4">
       <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
       <div class="post-hero-overlay">
-        <p class="section-label mb-2">Punto di ritrovo</p>
+        <p class="section-label mb-2">Meeting point</p>
         <h2>{{ tour.meeting_point }}</h2>
-        <p class="mb-0">Guida: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
+        <p class="mb-0">Guide: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
       </div>
     </section>
 
     <div class="row g-5">
       <div class="col-lg-7">
         <section class="post-content mb-5">
-          <h2 class="h5 fw-bold">Descrizione</h2>
+          <h2 class="h5 fw-bold">Description</h2>
           <p class="pre-wrap">{{ tour.description }}</p>
 
           <div class="info-grid my-4">
@@ -64,20 +70,20 @@
               <p class="mb-0">{{ tour.schedule_label }}</p>
             </div>
             <div>
-              <span class="section-label">Lingua</span>
+              <span class="section-label">Language</span>
               <p class="mb-0">{{ tour.language }}</p>
             </div>
             <div>
-              <span class="section-label">Durata</span>
-              <p class="mb-0">{{ tour.duration_mins }} minuti</p>
+              <span class="section-label">Duration</span>
+              <p class="mb-0">{{ tour.duration_mins }} minutes</p>
             </div>
             <div>
-              <span class="section-label">Capienza</span>
-              <p class="mb-0">{{ tour.max_participants }} persone</p>
+              <span class="section-label">Capacity</span>
+              <p class="mb-0">{{ tour.max_participants }} people</p>
             </div>
           </div>
 
-          <h3 class="h6 mt-4 fw-bold">Tappe previste</h3>
+          <h3 class="h6 mt-4 fw-bold">Planned stops</h3>
           <ol class="stops-list">
             {% for stop in stops %}
               <li>{{ stop.name }}</li>
@@ -86,27 +92,28 @@
         </section>
 
         <section class="gallery-section mb-5" aria-labelledby="gallery-title">
-          <h2 id="gallery-title" class="h5 fw-bold mb-3">Foto promozionali</h2>
+          <h2 id="gallery-title" class="h5 fw-bold mb-3">Promotional photos</h2>
           <div class="tour-gallery">
             {% for photo in photos %}
-              <img src="{{ photo.path }}" alt="Foto {{ loop.index }} di {{ tour.title }}">
+              <img src="{{ photo.path }}" alt="Photo {{ loop.index }} of {{ tour.title }}">
             {% endfor %}
           </div>
         </section>
 
         <section class="comments pt-4 border-top">
-          <h2 class="h5 fw-bold mb-4">Commenti</h2>
+          <h2 class="h5 fw-bold mb-4">Comments</h2>
 
           {% if current_user.is_authenticated %}
             <form class="comment-form mb-5 p-4 bg-light rounded-4 border shadow-sm" action="{{ url_for('add_comment', id=tour.id) }}" method="POST">
-              <label class="form-label small fw-bold" for="commentText">Aggiungi un commento</label>
+              <label class="form-label small fw-bold" for="commentText">Add a comment</label>
               <textarea id="commentText" name="text" class="form-control rounded-4 border-0" rows="3" minlength="2" maxlength="600" required></textarea>
-              <button type="submit" class="btn btn-dark rounded-pill px-4 mt-3">Pubblica</button>
+              <button type="submit" class="btn btn-dark rounded-pill px-4 mt-3">Post</button>
             </form>
           {% else %}
             <div class="alert alert-light border rounded-4 mb-5 text-center">
-              Per commentare devi
-              <a href="{{ url_for('login', next=request.path) }}" class="fw-bold text-dark">accedere</a>.
+              Please
+              <a href="{{ url_for('login', next=request.path) }}" class="fw-bold text-dark">sign in</a>
+              to comment.
             </div>
           {% endif %}
 
@@ -117,12 +124,12 @@
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                   <h3 class="h6 fw-bold mb-0">{{ comment.first_name }} {{ comment.last_name }}</h3>
                   {% if comment.role == 'guide' %}
-                    <span class="badge text-bg-success">Guida</span>
+                    <span class="badge text-bg-success">Guide</span>
                   {% else %}
-                    <span class="badge text-bg-info">Partecipante</span>
+                    <span class="badge text-bg-info">Participant</span>
                   {% endif %}
                   {% if comment.user_id == tour.guide_id %}
-                    <span class="badge text-bg-warning text-dark">Autore del tour</span>
+                    <span class="badge text-bg-warning text-dark">Tour author</span>
                   {% endif %}
                 </div>
                 <p class="small text-muted mb-2">{{ comment.publication_date }}</p>
@@ -130,56 +137,72 @@
               </div>
             </article>
           {% else %}
-            <p class="small text-muted">Non ci sono ancora commenti.</p>
+            <p class="small text-muted">There are no comments yet.</p>
           {% endfor %}
         </section>
       </div>
 
       <aside class="col-lg-5">
         <section class="booking-card card border-0 shadow-lg rounded-4 bg-white p-4">
-          <h2 class="h5 fw-bold mb-4 text-center">Prenota il Tour</h2>
+          <h2 class="h5 fw-bold mb-4 text-center">Book this tour</h2>
 
           {% if not current_user.is_authenticated %}
             <div class="alert alert-light border rounded-4 text-center">
-              Accedi come partecipante per prenotare una data disponibile.
+              Sign in as a participant to book an available date.
               <div class="d-grid gap-2 mt-3">
-                <a href="{{ url_for('login', next=request.path) }}" class="btn btn-dark rounded-pill">Accedi</a>
-                <a href="{{ url_for('register') }}" class="btn btn-outline-dark rounded-pill">Registrati</a>
+                <a href="{{ url_for('login', next=request.path) }}" class="btn btn-dark rounded-pill">Sign in</a>
+                <a href="{{ url_for('register') }}" class="btn btn-outline-dark rounded-pill">Register</a>
               </div>
             </div>
           {% elif current_user.role != 'participant' %}
             <div class="alert alert-light border rounded-4 text-center">
-              Le guide non possono prenotare con un account guida. Puoi creare un profilo partecipante separato con la stessa email.
+              Guides cannot book with a guide account. You can create a separate participant profile with the same email.
             </div>
           {% elif upcoming_dates %}
             <form action="{{ url_for('book_tour', id=tour.id) }}" method="POST">
               <div class="mb-3">
-                <label class="form-label small fw-bold" for="tourDate">Data disponibile</label>
-                <select id="tourDate" name="tour_date" class="form-select rounded-pill bg-light border-0 px-3" required>
+                <p class="form-label small fw-bold mb-2">Available dates</p>
+                <div class="booking-agenda" id="bookingAgenda">
+                  {% set ns = namespace(selected=false) %}
                   {% for item in upcoming_dates %}
-                    <option value="{{ item.date_iso }}" data-seats="{{ item.seats_left }}" {% if item.seats_left <= 0 %}disabled{% endif %}>
-                      {{ item.weekday }} {{ item.date_iso }} alle {{ item.start_time }} / {{ item.seats_left }} posti
-                    </option>
+                    <label class="booking-date {% if item.seats_left <= 0 %}is-full{% endif %}" for="date{{ loop.index }}">
+                      <input
+                        id="date{{ loop.index }}"
+                        type="radio"
+                        name="tour_date"
+                        value="{{ item.date_iso }}"
+                        data-seats="{{ item.seats_left }}"
+                        {% if item.seats_left <= 0 %}disabled{% elif not ns.selected %}checked{% set ns.selected = true %}{% endif %}
+                        required
+                      >
+                      <span class="booking-date-day">{{ item.weekday }}</span>
+                      <span class="booking-date-main">{{ item.date_iso }}</span>
+                      <span class="booking-date-meta">
+                        <i class="bi bi-clock me-1"></i>{{ item.start_time }}
+                        <span class="mx-1">/</span>
+                        {{ item.seats_left }} seats
+                      </span>
+                    </label>
                   {% endfor %}
-                </select>
+                </div>
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-bold" for="numPeople">Persone nella prenotazione</label>
+                <label class="form-label small fw-bold" for="numPeople">People in the booking</label>
                 <input id="numPeople" type="number" name="num_people" class="form-control rounded-pill bg-light border-0 px-3" min="1" max="4" value="1" required>
-                <p class="small text-muted mt-2 mb-0" id="seatHint">Il sistema controlla i posti rimasti prima di confermare.</p>
+                <p class="small text-muted mt-2 mb-0" id="seatHint">The system checks remaining seats before confirming.</p>
               </div>
 
               <div class="mb-4">
-                <label class="form-label small fw-bold" for="extraNames">Nomi accompagnatori</label>
-                <textarea id="extraNames" name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="3" placeholder="Un nome per ogni accompagnatore, separati da virgola o a capo"></textarea>
+                <label class="form-label small fw-bold" for="extraNames">Guest names</label>
+                <textarea id="extraNames" name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="3" placeholder="One name for each guest, separated by commas or new lines"></textarea>
               </div>
 
-              <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Conferma Prenotazione</button>
+              <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Confirm booking</button>
             </form>
           {% else %}
             <div class="alert alert-light border rounded-4 text-center">
-              Nessuna data prenotabile nei prossimi 60 giorni.
+              No bookable dates in the next 60 days.
             </div>
           {% endif %}
         </section>
@@ -191,29 +214,33 @@
 
 {% block scripts %}
 <script>
-  const dateSelect = document.getElementById('tourDate');
+  const agendaInputs = document.querySelectorAll('input[name="tour_date"]');
   const peopleInput = document.getElementById('numPeople');
   const seatHint = document.getElementById('seatHint');
 
   function syncSeatLimit() {
-    if (!dateSelect || !peopleInput) {
+    if (!agendaInputs.length || !peopleInput) {
       return;
     }
-    const option = dateSelect.options[dateSelect.selectedIndex];
-    const seats = Number(option.dataset.seats || 0);
+    const selected = document.querySelector('input[name="tour_date"]:checked');
+    if (!selected) {
+      return;
+    }
+    document.querySelectorAll('.booking-date').forEach((label) => {
+      label.classList.toggle('is-selected', label.contains(selected));
+    });
+    const seats = Number(selected.dataset.seats || 0);
     const maxPeople = Math.max(1, Math.min(4, seats));
     peopleInput.max = String(maxPeople);
     if (Number(peopleInput.value) > maxPeople) {
       peopleInput.value = String(maxPeople);
     }
     if (seatHint) {
-      seatHint.textContent = `${seats} posti disponibili per la data selezionata.`;
+      seatHint.textContent = `${seats} seats available for the selected date.`;
     }
   }
 
-  if (dateSelect) {
-    dateSelect.addEventListener('change', syncSeatLimit);
-    syncSeatLimit();
-  }
+  agendaInputs.forEach((input) => input.addEventListener('change', syncSeatLimit));
+  syncSeatLimit();
 </script>
 {% endblock %}

@@ -22,19 +22,19 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 LANGUAGES = ["Italian", "English", "Spanish", "Portuguese", "German"]
 WEEKDAYS = [
-    (0, "Lunedi"),
-    (1, "Martedi"),
-    (2, "Mercoledi"),
-    (3, "Giovedi"),
-    (4, "Venerdi"),
-    (5, "Sabato"),
-    (6, "Domenica"),
+    (0, "Monday"),
+    (1, "Tuesday"),
+    (2, "Wednesday"),
+    (3, "Thursday"),
+    (4, "Friday"),
+    (5, "Saturday"),
+    (6, "Sunday"),
 ]
 WEEKDAY_NAMES = dict(WEEKDAYS)
 DURATION_FILTERS = {
-    "short": ("Fino a 90 min", 0, 90),
+    "short": ("Up to 90 min", 0, 90),
     "medium": ("91-150 min", 91, 150),
-    "long": ("Oltre 150 min", 151, 10000),
+    "long": ("Over 150 min", 151, 10000),
 }
 
 login_manager = LoginManager()
@@ -101,7 +101,7 @@ def validate_file(file):
 
 def save_uploaded_file(file, prefix):
     if not validate_file(file):
-        raise ValueError("File non valido. Usa png, jpg, jpeg, gif oppure webp.")
+        raise ValueError("Invalid file. Use png, jpg, jpeg, gif or webp.")
     original = secure_filename(file.filename)
     ext = original.rsplit(".", 1)[1].lower()
     filename = f"{prefix}-{uuid.uuid4().hex}.{ext}"
@@ -113,11 +113,11 @@ def parse_positive_int(value, label, min_value=1, max_value=None):
     try:
         parsed = int(value)
     except (TypeError, ValueError):
-        raise ValueError(f"{label} deve essere un numero.")
+        raise ValueError(f"{label} must be a number.")
     if parsed < min_value:
-        raise ValueError(f"{label} deve essere almeno {min_value}.")
+        raise ValueError(f"{label} must be at least {min_value}.")
     if max_value is not None and parsed > max_value:
-        raise ValueError(f"{label} non puo superare {max_value}.")
+        raise ValueError(f"{label} cannot be greater than {max_value}.")
     return parsed
 
 
@@ -125,7 +125,7 @@ def parse_time_to_minutes(value):
     try:
         parsed = dt.time.fromisoformat(value)
     except (TypeError, ValueError):
-        raise ValueError("Orario non valido.")
+        raise ValueError("Invalid time.")
     return parsed.hour * 60 + parsed.minute
 
 
@@ -139,7 +139,7 @@ def parse_iso_date(value):
     try:
         return dt.date.fromisoformat(value)
     except (TypeError, ValueError):
-        raise ValueError("Data non valida.")
+        raise ValueError("Invalid date.")
 
 
 def tour_datetime(tour_date, start_time):
@@ -162,7 +162,7 @@ def require_role(role):
     if not current_user.is_authenticated:
         return redirect(url_for("login", next=request.path))
     if current_user.role != role:
-        flash("Questo account non ha i permessi per eseguire questa azione.", "warning")
+        flash("This account does not have permission to perform this action.", "warning")
         return redirect(url_for("index"))
     return None
 
@@ -208,6 +208,32 @@ def primary_photo(conn, tour_id):
         (tour_id,),
     ).fetchone()
     return photo["path"] if photo else "/static/assets/img/trail-forest.jpg"
+
+
+def tour_like_count(conn, tour_id):
+    row = conn.execute(
+        "SELECT COUNT(*) AS total FROM tour_likes WHERE tour_id = ?",
+        (tour_id,),
+    ).fetchone()
+    return row["total"]
+
+
+def tour_comment_count(conn, tour_id):
+    row = conn.execute(
+        "SELECT COUNT(*) AS total FROM comments WHERE tour_id = ?",
+        (tour_id,),
+    ).fetchone()
+    return row["total"]
+
+
+def current_user_liked(conn, tour_id):
+    if not current_user.is_authenticated:
+        return False
+    row = conn.execute(
+        "SELECT 1 FROM tour_likes WHERE tour_id = ? AND user_id = ?",
+        (tour_id, current_user.id),
+    ).fetchone()
+    return row is not None
 
 
 def get_tour_row(conn, tour_id):
@@ -323,6 +349,9 @@ def enrich_tour(conn, row, selected_date=None):
     tour["schedule_label"] = format_schedule(tour["schedule"])
     tour["primary_photo"] = primary_photo(conn, tour["id"])
     tour["can_edit"] = not tour_has_any_reservations(conn, tour["id"])
+    tour["like_count"] = tour_like_count(conn, tour["id"])
+    tour["comment_count"] = tour_comment_count(conn, tour["id"])
+    tour["is_liked"] = current_user_liked(conn, tour["id"])
     if selected_date:
         schedule = get_schedule_for_date(conn, tour["id"], selected_date)
         tour["selected_start_time"] = schedule["start_time"] if schedule else None
@@ -371,16 +400,16 @@ def parse_schedule_form():
         if request.form.get(f"day_{weekday}"):
             start_time = (request.form.get(f"time_{weekday}") or "").strip()
             if not start_time:
-                errors.append(f"Inserisci un orario per {label}.")
+                errors.append(f"Enter a time for {label}.")
                 continue
             try:
                 parse_time_to_minutes(start_time)
             except ValueError:
-                errors.append(f"Orario non valido per {label}.")
+                errors.append(f"Invalid time for {label}.")
                 continue
             schedules.append({"weekday": weekday, "start_time": start_time})
     if not schedules:
-        errors.append("Seleziona almeno un giorno della settimana.")
+        errors.append("Select at least one weekday.")
     return schedules, errors
 
 
@@ -394,20 +423,20 @@ def parse_tour_form(conn, exclude_tour_id=None):
     stops = split_names(request.form.get("stops"))
 
     if len(title) < 4:
-        errors.append("Il titolo deve contenere almeno 4 caratteri.")
+        errors.append("The title must contain at least 4 characters.")
     if len(theme) < 3:
-        errors.append("Inserisci un tema del tour.")
+        errors.append("Enter a tour theme.")
     if len(meeting_point) < 4:
-        errors.append("Inserisci un punto di ritrovo chiaro.")
+        errors.append("Enter a clear meeting point.")
     if len(description) < 30:
-        errors.append("La descrizione deve contenere almeno 30 caratteri.")
+        errors.append("The description must contain at least 30 characters.")
     if language not in current_user.spoken_languages:
-        errors.append("La lingua del tour deve essere tra quelle parlate dalla guida.")
+        errors.append("The tour language must be one of the guide's spoken languages.")
     if not stops:
-        errors.append("Inserisci almeno una tappa.")
+        errors.append("Enter at least one stop.")
 
     try:
-        duration_mins = parse_positive_int(request.form.get("duration_mins"), "Durata", 30, 360)
+        duration_mins = parse_positive_int(request.form.get("duration_mins"), "Duration", 30, 360)
     except ValueError as exc:
         duration_mins = None
         errors.append(str(exc))
@@ -415,7 +444,7 @@ def parse_tour_form(conn, exclude_tour_id=None):
     try:
         max_participants = parse_positive_int(
             request.form.get("max_participants"),
-            "Numero massimo di partecipanti",
+            "Maximum number of participants",
             1,
             40,
         )
@@ -438,8 +467,8 @@ def parse_tour_form(conn, exclude_tour_id=None):
             )
             if overlap:
                 errors.append(
-                    f"Sovrapposizione agenda: {WEEKDAY_NAMES[schedule['weekday']]} "
-                    f"{schedule['start_time']} coincide con '{overlap['title']}'."
+                    f"Schedule overlap: {WEEKDAY_NAMES[schedule['weekday']]} "
+                    f"{schedule['start_time']} overlaps with '{overlap['title']}'."
                 )
 
     return {
@@ -462,12 +491,12 @@ def get_form_photo_files():
 def validate_five_photos(files, required):
     provided = [file for file in files if file and file.filename]
     if required and len(provided) != 5:
-        return "Devi caricare esattamente 5 foto promozionali."
+        return "You must upload exactly 5 promotional photos."
     if not required and provided and len(provided) != 5:
-        return "Per sostituire le foto devi caricarne esattamente 5."
+        return "To replace photos, upload exactly 5 new photos."
     for file in provided:
         if not validate_file(file):
-            return "Le foto devono essere png, jpg, jpeg, gif oppure webp."
+            return "Photos must be png, jpg, jpeg, gif or webp."
     return None
 
 
@@ -493,7 +522,11 @@ def insert_tour_details(conn, tour_id, data, photo_files):
 @app.route("/")
 def index():
     conn = get_db_connection()
-    tours = filtered_tours(conn, {})[:6]
+    tours = sorted(
+        filtered_tours(conn, {}),
+        key=lambda item: (item["like_count"], item["comment_count"], item["id"]),
+        reverse=True,
+    )[:3]
     conn.close()
     return render_template("index.html", tours=tours)
 
@@ -516,7 +549,7 @@ def hiking():
     try:
         tours = filtered_tours(conn, filters)
     except ValueError:
-        flash("Il filtro data non e valido.", "warning")
+        flash("The date filter is not valid.", "warning")
         filters["date"] = ""
         tours = filtered_tours(conn, filters)
     conn.close()
@@ -531,7 +564,7 @@ def login():
         role = request.form.get("role")
 
         if role not in {"guide", "participant"}:
-            flash("Seleziona il tipo di account.", "danger")
+            flash("Select an account type.", "danger")
             return render_template("login.html")
 
         conn = get_db_connection()
@@ -552,7 +585,7 @@ def login():
             )
             login_user(user_obj)
             return safe_redirect()
-        flash("Credenziali errate per il tipo di account selezionato.", "danger")
+        flash("Wrong credentials for the selected account type.", "danger")
     return render_template("login.html")
 
 
@@ -568,21 +601,21 @@ def register():
         errors = []
 
         if len(first_name) < 2:
-            errors.append("Inserisci un nome valido.")
+            errors.append("Enter a valid first name.")
         if len(last_name) < 2:
-            errors.append("Inserisci un cognome valido.")
+            errors.append("Enter a valid last name.")
         if "@" not in email or "." not in email:
-            errors.append("Inserisci una email valida.")
+            errors.append("Enter a valid email.")
         if len(password) < 6:
-            errors.append("La password deve avere almeno 6 caratteri.")
+            errors.append("The password must have at least 6 characters.")
         if role not in {"guide", "participant"}:
-            errors.append("Seleziona un tipo account valido.")
+            errors.append("Select a valid account type.")
 
         languages = ""
         if role == "guide":
             valid_languages = [lang for lang in selected_languages if lang in LANGUAGES]
             if not valid_languages:
-                errors.append("Una guida deve selezionare almeno una lingua.")
+                errors.append("A guide must select at least one language.")
             languages = ",".join(valid_languages)
 
         if errors:
@@ -607,10 +640,10 @@ def register():
                 ),
             )
             conn.commit()
-            flash("Registrazione completata. Ora puoi accedere.", "success")
+            flash("Registration completed. You can now sign in.", "success")
             return redirect(url_for("login"))
         except IntegrityError:
-            flash("Esiste gia un account con questa email e questo ruolo.", "danger")
+            flash("An account with this email and role already exists.", "danger")
         finally:
             conn.close()
     return render_template("register.html")
@@ -666,7 +699,7 @@ def create_tour():
             tour_id = cursor.lastrowid
             insert_tour_details(conn, tour_id, data, photo_files)
             conn.commit()
-            flash("Tour pubblicato con successo.", "success")
+            flash("Tour planned successfully.", "success")
             return redirect(url_for("tour_detail", id=tour_id))
         except ValueError as exc:
             conn.rollback()
@@ -694,7 +727,7 @@ def edit_tour(id):
         abort(403)
     if tour_has_any_reservations(conn, id):
         conn.close()
-        flash("Questo tour ha gia ricevuto prenotazioni e non puo essere modificato.", "warning")
+        flash("This tour already has reservations and cannot be edited.", "warning")
         return redirect(url_for("tour_detail", id=id))
 
     selected_schedules = {row["weekday"]: row["start_time"] for row in get_schedules(conn, id)}
@@ -760,7 +793,7 @@ def edit_tour(id):
                         (id, path, position),
                     )
             conn.commit()
-            flash("Tour aggiornato.", "success")
+            flash("Tour updated.", "success")
             return redirect(url_for("tour_detail", id=id))
         except ValueError as exc:
             conn.rollback()
@@ -811,13 +844,42 @@ def tour_detail(id):
     )
 
 
+@app.route("/tour/<int:id>/like", methods=["POST"])
+def toggle_like(id):
+    if not current_user.is_authenticated:
+        flash("Sign in to like this tour.", "warning")
+        return redirect(url_for("login", next=url_for("tour_detail", id=id)))
+
+    conn = get_db_connection()
+    if not get_tour_row(conn, id):
+        conn.close()
+        abort(404)
+
+    existing = conn.execute(
+        "SELECT id FROM tour_likes WHERE tour_id = ? AND user_id = ?",
+        (id, current_user.id),
+    ).fetchone()
+    if existing:
+        conn.execute("DELETE FROM tour_likes WHERE id = ?", (existing["id"],))
+        flash("Like removed.", "success")
+    else:
+        conn.execute(
+            "INSERT INTO tour_likes (tour_id, user_id) VALUES (?, ?)",
+            (id, current_user.id),
+        )
+        flash("Like added.", "success")
+    conn.commit()
+    conn.close()
+    return redirect(url_for("tour_detail", id=id))
+
+
 @app.route("/tour/<int:id>/book", methods=["POST"])
 def book_tour(id):
     if not current_user.is_authenticated:
-        flash("Accedi come partecipante per prenotare.", "warning")
+        flash("Sign in as a participant to book.", "warning")
         return redirect(url_for("login", next=url_for("tour_detail", id=id)))
     if current_user.role != "participant":
-        flash("Le guide non possono prenotare con un account guida.", "warning")
+        flash("Guides cannot book with a guide account.", "warning")
         return redirect(url_for("tour_detail", id=id))
 
     conn = get_db_connection()
@@ -829,23 +891,23 @@ def book_tour(id):
     try:
         tour_date = parse_iso_date(request.form.get("tour_date"))
         if tour_date < dt.date.today():
-            raise ValueError("Non puoi prenotare una data passata.")
+            raise ValueError("You cannot book a past date.")
         schedule = get_schedule_for_date(conn, id, tour_date)
         if not schedule:
-            raise ValueError("La data scelta non e prevista dallo schedule del tour.")
+            raise ValueError("The selected date is not part of this tour schedule.")
         if tour_datetime(tour_date, schedule["start_time"]) <= dt.datetime.now():
-            raise ValueError("Questo appuntamento e gia iniziato o concluso.")
+            raise ValueError("This tour date has already started or ended.")
 
-        num_people = parse_positive_int(request.form.get("num_people"), "Numero partecipanti", 1, 4)
+        num_people = parse_positive_int(request.form.get("num_people"), "Number of participants", 1, 4)
         names = split_names(request.form.get("extra_names"))
         expected_extra = num_people - 1
         if len(names) != expected_extra:
             raise ValueError(
-                f"Inserisci esattamente {expected_extra} nome/i aggiuntivo/i per questa prenotazione."
+                f"Enter exactly {expected_extra} additional guest name(s) for this booking."
             )
         seats_left = available_places(conn, tour, tour_date)
         if num_people > seats_left:
-            raise ValueError(f"Posti insufficienti: ne restano {seats_left}.")
+            raise ValueError(f"Not enough seats: {seats_left} left.")
 
         overlap = participant_has_overlap(
             conn,
@@ -855,7 +917,7 @@ def book_tour(id):
             tour["duration_mins"],
         )
         if overlap:
-            raise ValueError(f"Hai gia una prenotazione sovrapposta: {overlap['title']}.")
+            raise ValueError(f"You already have an overlapping booking: {overlap['title']}.")
 
         existing = conn.execute(
             """
@@ -865,7 +927,7 @@ def book_tour(id):
             (current_user.id, id, tour_date.isoformat()),
         ).fetchone()
         if existing and existing["status"] == "booked":
-            raise ValueError("Hai gia prenotato questo tour in questa data.")
+            raise ValueError("You have already booked this tour on this date.")
         if existing and existing["status"] == "cancelled":
             conn.execute(
                 """
@@ -884,11 +946,11 @@ def book_tour(id):
                 (current_user.id, id, tour_date.isoformat(), num_people, ", ".join(names)),
             )
         conn.commit()
-        flash("Prenotazione confermata.", "success")
+        flash("Booking confirmed.", "success")
     except ValueError as exc:
         flash(str(exc), "danger")
     except IntegrityError:
-        flash("Prenotazione gia presente per questa data.", "danger")
+        flash("A booking already exists for this date.", "danger")
     finally:
         conn.close()
     return redirect(url_for("tour_detail", id=id))
@@ -897,7 +959,7 @@ def book_tour(id):
 @app.route("/tour/<int:id>/comment", methods=["POST"])
 def add_comment(id):
     if not current_user.is_authenticated:
-        flash("Accedi per commentare.", "warning")
+        flash("Sign in to comment.", "warning")
         return redirect(url_for("login", next=url_for("tour_detail", id=id)))
 
     conn = get_db_connection()
@@ -906,9 +968,9 @@ def add_comment(id):
         abort(404)
     text = (request.form.get("text") or "").strip()
     if len(text) < 2:
-        flash("Il commento e troppo breve.", "danger")
+        flash("The comment is too short.", "danger")
     elif len(text) > 600:
-        flash("Il commento non puo superare 600 caratteri.", "danger")
+        flash("The comment cannot exceed 600 characters.", "danger")
     else:
         conn.execute(
             """
@@ -918,7 +980,7 @@ def add_comment(id):
             (id, current_user.id, dt.date.today().isoformat(), text),
         )
         conn.commit()
-        flash("Commento pubblicato.", "success")
+        flash("Comment posted.", "success")
     conn.close()
     return redirect(url_for("tour_detail", id=id))
 
@@ -985,14 +1047,14 @@ def cancel_reservation(reservation_id):
         conn.close()
         abort(404)
     if reservation["status"] != "booked":
-        flash("Questa prenotazione e gia stata annullata.", "warning")
+        flash("This booking has already been cancelled.", "warning")
         conn.close()
         return redirect(url_for("participant_profile"))
 
     tour_date = parse_iso_date(reservation["tour_date"])
     schedule = get_schedule_for_date(conn, reservation["tour_id"], tour_date)
     if not schedule or tour_datetime(tour_date, schedule["start_time"]) - dt.datetime.now() < dt.timedelta(hours=24):
-        flash("Puoi annullare solo almeno 24 ore prima dell'inizio del tour.", "danger")
+        flash("You can cancel only at least 24 hours before the tour starts.", "danger")
         conn.close()
         return redirect(url_for("participant_profile"))
 
@@ -1006,7 +1068,7 @@ def cancel_reservation(reservation_id):
     )
     conn.commit()
     conn.close()
-    flash("Prenotazione annullata.", "success")
+    flash("Booking cancelled.", "success")
     return redirect(url_for("participant_profile"))
 
 
@@ -1074,7 +1136,7 @@ def guide_profile():
                     "people_count": group["people_count"],
                     "reservations": reservations,
                     "report": report,
-                    "can_report": bool(start_dt and start_dt < now),
+                    "can_report": bool(start_dt and start_dt < now and not report),
                 }
             )
         tours.append(tour)
@@ -1102,37 +1164,39 @@ def submit_report(tour_id, tour_date):
         parsed_date = parse_iso_date(tour_date)
         schedule = get_schedule_for_date(conn, tour_id, parsed_date)
         if not schedule:
-            raise ValueError("Questa data non appartiene allo schedule del tour.")
+            raise ValueError("This date does not belong to the tour schedule.")
         if tour_datetime(parsed_date, schedule["start_time"]) >= dt.datetime.now():
-            raise ValueError("Il report puo essere inviato solo dopo lo svolgimento del tour.")
+            raise ValueError("The report can be submitted only after the tour has taken place.")
 
         expected = active_reserved_places(conn, tour_id, parsed_date)
         if expected <= 0:
-            raise ValueError("Non ci sono prenotazioni per questa data.")
+            raise ValueError("There are no bookings for this date.")
+        existing_report = conn.execute(
+            "SELECT id FROM tour_reports WHERE tour_id = ? AND tour_date = ?",
+            (tour_id, tour_date),
+        ).fetchone()
+        if existing_report:
+            raise ValueError("The report for this date has already been submitted.")
         actual = parse_positive_int(
             request.form.get("actual_participants"),
-            "Partecipanti effettivi",
+            "Actual participants",
             0,
             expected,
         )
         file = request.files.get("evidence_photo")
         if not validate_file(file):
-            raise ValueError("Carica una foto prova valida.")
+            raise ValueError("Upload a valid evidence photo.")
         photo_path = save_uploaded_file(file, f"report-{tour_id}-{tour_date}")
 
         conn.execute(
             """
             INSERT INTO tour_reports (tour_id, tour_date, actual_participants, evidence_photo)
             VALUES (?, ?, ?, ?)
-            ON CONFLICT(tour_id, tour_date) DO UPDATE SET
-                actual_participants = excluded.actual_participants,
-                evidence_photo = excluded.evidence_photo,
-                created_at = CURRENT_TIMESTAMP
             """,
             (tour_id, tour_date, actual, photo_path),
         )
         conn.commit()
-        flash("Report salvato.", "success")
+        flash("Report saved.", "success")
     except ValueError as exc:
         flash(str(exc), "danger")
     finally:

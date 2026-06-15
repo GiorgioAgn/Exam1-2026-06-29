@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Tour | NatureS Siracusa{% endblock %}
+{% block title %}Tours | Free Walking Tour Siracusa{% endblock %}
 
 {% block extra_css %}
 <link href="{{ url_for('static', filename='assets/css/hiking.css') }}" rel="stylesheet">
@@ -19,7 +19,7 @@
     <p class="section-label mb-2">Siracusa</p>
     <h1 class="homepage-title mb-4">Free Walking Tours</h1>
     <p class="homepage-text mb-0 text-muted">
-      Scegli una data, una durata o una lingua e trova il tour giusto per la tua visita.
+      Choose a date, duration or language and find the right tour for your visit.
     </p>
   </header>
 
@@ -29,26 +29,26 @@
         <div class="accordion-item">
           <h2 class="accordion-header" id="hikingFiltersHeading">
             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hikingFilters" aria-expanded="true" aria-controls="hikingFilters">
-              Filtri
+              Filters
             </button>
           </h2>
           <div id="hikingFilters" class="accordion-collapse collapse show" aria-labelledby="hikingFiltersHeading" data-bs-parent="#hikingSidebar">
             <div class="accordion-body">
               <form action="{{ url_for('hiking') }}" method="get" class="filter-form">
                 <div class="mb-3">
-                  <label class="form-label small fw-bold" for="q">Cerca</label>
-                  <input class="form-control rounded-pill bg-light border-0 px-4" id="q" name="q" type="search" value="{{ filters.q }}" placeholder="Titolo o tema">
+                  <label class="form-label small fw-bold" for="q">Search</label>
+                  <input class="form-control rounded-pill bg-light border-0 px-4" id="q" name="q" type="search" value="{{ filters.q }}" placeholder="Title or theme">
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label small fw-bold" for="date">Data</label>
+                  <label class="form-label small fw-bold" for="date">Date</label>
                   <input class="form-control rounded-pill bg-light border-0 px-4" id="date" name="date" type="date" value="{{ filters.date }}">
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label small fw-bold" for="duration">Durata</label>
+                  <label class="form-label small fw-bold" for="duration">Duration</label>
                   <select class="form-select rounded-pill bg-light border-0 px-4" id="duration" name="duration">
-                    <option value="">Qualsiasi durata</option>
+                    <option value="">Any duration</option>
                     {% for key, option in DURATION_FILTERS.items() %}
                       <option value="{{ key }}" {% if filters.duration == key %}selected{% endif %}>{{ option[0] }}</option>
                     {% endfor %}
@@ -56,9 +56,9 @@
                 </div>
 
                 <div class="mb-4">
-                  <label class="form-label small fw-bold" for="language">Lingua</label>
+                  <label class="form-label small fw-bold" for="language">Language</label>
                   <select class="form-select rounded-pill bg-light border-0 px-4" id="language" name="language">
-                    <option value="">Tutte le lingue</option>
+                    <option value="">All languages</option>
                     {% for language in LANGUAGES %}
                       <option value="{{ language }}" {% if filters.language == language %}selected{% endif %}>{{ language }}</option>
                     {% endfor %}
@@ -66,7 +66,7 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                  <button class="btn btn-dark rounded-pill px-4" type="submit">Applica</button>
+                  <button class="btn btn-dark rounded-pill px-4" type="submit">Apply</button>
                   <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('hiking') }}">Reset</a>
                 </div>
               </form>
@@ -84,16 +84,16 @@
               <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
               <div class="hike-caption">
                 <span class="hike-likes badge rounded-pill text-bg-dark">
-                  {{ tour.language }} / max {{ tour.max_participants }}
+                  <i class="bi bi-heart-fill me-1"></i>{{ tour.like_count }} / {{ tour.language }}
                 </span>
                 <h3>{{ tour.title }}</h3>
               </div>
               <div class="hike-desc">
                 <p class="mb-1">{{ tour.duration_mins }} min / {{ tour.theme }}</p>
-                <p class="small mb-2">Guida: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
+                <p class="small mb-2">Guide: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
                 <p class="small mb-0">{{ tour.schedule_label }}</p>
                 {% if filters.date and tour.selected_seats_left is not none %}
-                  <p class="small mt-2 mb-0 fw-bold">{{ tour.selected_seats_left }} posti rimasti</p>
+                  <p class="small mt-2 mb-0 fw-bold">{{ tour.selected_seats_left }} seats left</p>
                 {% endif %}
               </div>
             </a>
@@ -101,8 +101,8 @@
         {% else %}
           <div class="col-12">
             <div class="empty-state">
-              <h2 class="h5 fw-bold">Nessun tour trovato</h2>
-              <p class="text-muted mb-0">Prova a cambiare data, lingua o durata.</p>
+              <h2 class="h5 fw-bold">No tours found</h2>
+              <p class="text-muted mb-0">Try changing date, language or duration.</p>
             </div>
           </div>
         {% endfor %}

@@ -1,22 +1,22 @@
 {% extends 'base.html' %}
-{% block title %}Registrati | NatureS Siracusa{% endblock %}
+{% block title %}Register | Free Walking Tour Siracusa{% endblock %}
 
 {% block content %}
 <main class="auth-page container-fluid px-3 px-lg-5 py-5 d-flex align-items-center justify-content-center">
   <section class="auth-card auth-card-wide card border-0 shadow-sm rounded-4 p-4 p-lg-5">
     <div class="text-center mb-4">
-      <p class="section-label mb-2">Nuovo account</p>
-      <h1 class="auth-title mb-0">Registrati</h1>
+      <p class="section-label mb-2">New account</p>
+      <h1 class="auth-title mb-0">Register</h1>
     </div>
 
     <form action="{{ url_for('register') }}" method="POST">
       <div class="row g-2 mb-3">
         <div class="col-sm-6">
-          <label class="form-label small fw-bold" for="first_name">Nome</label>
+          <label class="form-label small fw-bold" for="first_name">First name</label>
           <input id="first_name" type="text" name="first_name" class="form-control rounded-pill bg-light border-0 px-4 py-2" minlength="2" required>
         </div>
         <div class="col-sm-6">
-          <label class="form-label small fw-bold" for="last_name">Cognome</label>
+          <label class="form-label small fw-bold" for="last_name">Last name</label>
           <input id="last_name" type="text" name="last_name" class="form-control rounded-pill bg-light border-0 px-4 py-2" minlength="2" required>
         </div>
       </div>
@@ -32,18 +32,18 @@
       </div>
 
       <div class="mb-4">
-        <label class="form-label small fw-bold" for="roleSelect">Tipo account</label>
+        <label class="form-label small fw-bold" for="roleSelect">Account type</label>
         <select name="role" id="roleSelect" class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
-          <option value="participant">Partecipante</option>
-          <option value="guide">Guida</option>
+          <option value="participant">Participant</option>
+          <option value="guide">Guide</option>
         </select>
         <p class="small text-muted mt-2 mb-0">
-          La stessa email puo avere un profilo guida e uno partecipante separati.
+          The same email can have one guide profile and one separate participant profile.
         </p>
       </div>
 
       <fieldset class="language-panel mb-4 d-none" id="languagesField">
-        <legend class="form-label small fw-bold mb-2">Lingue parlate</legend>
+        <legend class="form-label small fw-bold mb-2">Spoken languages</legend>
         <div class="row g-2">
           {% for language in LANGUAGES %}
             <div class="col-6">
@@ -56,12 +56,12 @@
         </div>
       </fieldset>
 
-      <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Registrati</button>
+      <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Register</button>
     </form>
 
     <p class="text-center mt-4 mb-0 text-muted small">
-      Hai gia un account?
-      <a href="{{ url_for('login') }}" class="text-dark fw-bold">Accedi</a>
+      Already have an account?
+      <a href="{{ url_for('login') }}" class="text-dark fw-bold">Sign in</a>
     </p>
   </section>
 </main>
@@ -77,7 +77,7 @@
     const isGuide = roleSelect.value === 'guide';
     languagesField.classList.toggle('d-none', !isGuide);
     const hasLanguage = Array.from(languageInputs).some((item) => item.checked);
-    languageInputs[0].setCustomValidity(isGuide && !hasLanguage ? 'Seleziona almeno una lingua.' : '');
+    languageInputs[0].setCustomValidity(isGuide && !hasLanguage ? 'Select at least one language.' : '');
   }
 
   roleSelect.addEventListener('change', syncLanguagePanel);

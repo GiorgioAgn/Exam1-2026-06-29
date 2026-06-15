@@ -106,6 +106,70 @@
 	top: 100px;
 }
 
+.like-form .btn {
+	font-weight: 800;
+}
+
+.booking-agenda {
+	display: grid;
+	gap: 10px;
+	max-height: 320px;
+	overflow-y: auto;
+	padding-right: 4px;
+}
+
+.booking-date {
+	display: grid;
+	grid-template-columns: 86px 1fr;
+	gap: 4px 12px;
+	align-items: center;
+	padding: 14px 16px;
+	border: 1px solid rgba(31, 95, 59, 0.14);
+	border-radius: 18px;
+	background: rgba(244, 241, 234, 0.72);
+	cursor: pointer;
+	transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+
+.booking-date:hover {
+	transform: translateY(-1px);
+	background: rgba(255, 255, 255, 0.86);
+}
+
+.booking-date input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.booking-date.is-selected {
+	border-color: var(--nature-forest);
+	background: rgba(31, 95, 59, 0.1);
+}
+
+.booking-date.is-full {
+	opacity: 0.52;
+	cursor: not-allowed;
+}
+
+.booking-date-day {
+	grid-row: span 2;
+	color: var(--nature-forest);
+	font-size: 0.78rem;
+	font-weight: 850;
+	text-transform: uppercase;
+}
+
+.booking-date-main {
+	color: var(--nature-forest-dark);
+	font-weight: 850;
+}
+
+.booking-date-meta {
+	color: #5e6b62;
+	font-size: 0.88rem;
+}
+
 .comment-avatar {
 	width: 45px;
 	height: 45px;

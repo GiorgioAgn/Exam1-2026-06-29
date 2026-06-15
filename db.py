@@ -232,6 +232,21 @@ def seed_sample_data(conn):
         """,
         (ortigia, participant_anna, "2026-06-11", "Bellissima idea per scoprire Ortigia con calma. Ho prenotato per luglio!"),
     )
+    for tour_id, user_id in [
+        (ortigia, participant_anna),
+        (ortigia, participant_paolo),
+        (ortigia, participant_lucia),
+        (neapolis, participant_paolo),
+        (neapolis, participant_anna),
+        (street_food, participant_lucia),
+    ]:
+        conn.execute(
+            """
+            INSERT INTO tour_likes (tour_id, user_id)
+            VALUES (?, ?)
+            """,
+            (tour_id, user_id),
+        )
     conn.execute(
         """
         INSERT INTO tour_reports (tour_id, tour_date, actual_participants, evidence_photo)

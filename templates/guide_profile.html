@@ -1,20 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Profilo Guida | NatureS Siracusa{% endblock %}
+{% block title %}Guide Profile | Free Walking Tour Siracusa{% endblock %}
 
 {% block content %}
 <main class="container-fluid px-3 px-lg-5 py-4 py-lg-5">
   <header class="mb-4 mb-lg-5">
     <div class="d-flex flex-column flex-lg-row justify-content-between gap-3">
       <div>
-        <p class="section-label mb-2">Profilo guida</p>
-        <h1 class="homepage-title mb-3">I tuoi tour</h1>
+        <p class="section-label mb-2">Guide profile</p>
+        <h1 class="homepage-title mb-3">Your tours</h1>
         <p class="homepage-text mb-0 text-muted">
-          Controlla prenotazioni, partecipanti attesi e report post-tour.
+          Check bookings, expected participants and post-tour reports.
         </p>
       </div>
       <div class="align-self-lg-end">
         <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('create_tour') }}">
-          <i class="bi bi-plus-lg me-1"></i>Nuovo tour
+          <i class="bi bi-plus-lg me-1"></i>Plan tour
         </a>
       </div>
     </div>
@@ -29,35 +29,35 @@
             <h2 class="h4 fw-bold mb-2">{{ tour.title }}</h2>
             <p class="mb-1"><i class="bi bi-calendar-week me-1"></i>{{ tour.schedule_label }}</p>
             <p class="mb-1"><i class="bi bi-geo-alt me-1"></i>{{ tour.meeting_point }}</p>
-            <p class="mb-0"><i class="bi bi-people me-1"></i>Capienza: {{ tour.max_participants }}</p>
+            <p class="mb-0"><i class="bi bi-people me-1"></i>Capacity: {{ tour.max_participants }}</p>
           </div>
           <div class="profile-card-actions">
-            <a class="btn btn-outline-dark rounded-pill px-4" href="{{ url_for('tour_detail', id=tour.id) }}">Apri</a>
+            <a class="btn btn-outline-dark rounded-pill px-4" href="{{ url_for('tour_detail', id=tour.id) }}">Open</a>
             {% if tour.can_edit %}
-              <a class="btn btn-outline-success rounded-pill px-4" href="{{ url_for('edit_tour', id=tour.id) }}">Modifica</a>
+              <a class="btn btn-outline-success rounded-pill px-4" href="{{ url_for('edit_tour', id=tour.id) }}">Edit</a>
             {% else %}
-              <span class="badge text-bg-secondary rounded-pill p-2">Modifica bloccata</span>
+              <span class="badge text-bg-secondary rounded-pill p-2">Editing locked</span>
             {% endif %}
           </div>
         </div>
 
         <div class="reservation-block mt-4">
-          <h3 class="h6 fw-bold mb-3">Prenotazioni per data</h3>
+          <h3 class="h6 fw-bold mb-3">Bookings by date</h3>
           {% for group in tour.reservation_dates %}
             <section class="reservation-date">
               <div class="reservation-date-head">
                 <div>
-                  <p class="mb-1 fw-bold">{{ group.date }} alle {{ group.start_time }}</p>
+                  <p class="mb-1 fw-bold">{{ group.date }} at {{ group.start_time }}</p>
                   <p class="small text-muted mb-0">
-                    {{ group.reservation_count }} prenotazioni / {{ group.people_count }} partecipanti attesi
+                    {{ group.reservation_count }} bookings / {{ group.people_count }} expected participants
                   </p>
                 </div>
                 {% if group.report %}
-                  <span class="badge text-bg-success rounded-pill p-2">Report inviato: {{ group.report.actual_participants }} presenti</span>
+                  <span class="badge text-bg-success rounded-pill p-2">Report submitted: {{ group.report.actual_participants }} present</span>
                 {% elif group.can_report %}
-                  <span class="badge text-bg-warning text-dark rounded-pill p-2">Report richiesto</span>
+                  <span class="badge text-bg-warning text-dark rounded-pill p-2">Report required</span>
                 {% else %}
-                  <span class="badge text-bg-light text-dark border rounded-pill p-2">In programma</span>
+                  <span class="badge text-bg-light text-dark border rounded-pill p-2">Scheduled</span>
                 {% endif %}
               </div>
 
@@ -65,10 +65,10 @@
                 <table class="table table-sm align-middle">
                   <thead>
                     <tr>
-                      <th>Partecipante</th>
+                      <th>Participant</th>
                       <th>Email</th>
-                      <th>Persone</th>
-                      <th>Accompagnatori</th>
+                      <th>People</th>
+                      <th>Guests</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -84,34 +84,43 @@
                 </table>
               </div>
 
+              {% if group.report %}
+                <div class="report-summary mt-3">
+                  <span class="small text-muted">
+                    Report closed with {{ group.report.actual_participants }} actual participants.
+                  </span>
+                  <a class="small fw-bold text-success ms-2" href="{{ group.report.evidence_photo }}" target="_blank" rel="noopener">Open evidence photo</a>
+                </div>
+              {% endif %}
+
               {% if group.can_report %}
                 <form class="report-form mt-3" action="{{ url_for('submit_report', tour_id=tour.id, tour_date=group.date) }}" method="POST" enctype="multipart/form-data">
                   <div class="row g-2 align-items-end">
                     <div class="col-md-4">
-                      <label class="form-label small fw-bold" for="actual{{ tour.id }}{{ loop.index }}">Partecipanti effettivi</label>
+                      <label class="form-label small fw-bold" for="actual{{ tour.id }}{{ loop.index }}">Actual participants</label>
                       <input id="actual{{ tour.id }}{{ loop.index }}" class="form-control rounded-pill bg-light border-0 px-3" type="number" name="actual_participants" min="0" max="{{ group.people_count }}" value="{{ group.report.actual_participants if group.report else group.people_count }}" required>
                     </div>
                     <div class="col-md-5">
-                      <label class="form-label small fw-bold" for="evidence{{ tour.id }}{{ loop.index }}">Foto prova</label>
+                      <label class="form-label small fw-bold" for="evidence{{ tour.id }}{{ loop.index }}">Evidence photo</label>
                       <input id="evidence{{ tour.id }}{{ loop.index }}" class="form-control rounded-pill border-0" type="file" name="evidence_photo" accept="image/*" required>
                     </div>
                     <div class="col-md-3 d-grid">
-                      <button class="btn btn-dark rounded-pill" type="submit">Salva report</button>
+                      <button class="btn btn-dark rounded-pill" type="submit">Save report</button>
                     </div>
                   </div>
                 </form>
               {% endif %}
             </section>
           {% else %}
-            <p class="small text-muted mb-0">Nessuna prenotazione ricevuta per questo tour.</p>
+            <p class="small text-muted mb-0">No bookings received for this tour.</p>
           {% endfor %}
         </div>
       </article>
     {% else %}
       <div class="empty-state">
-        <h2 class="h5 fw-bold">Non hai ancora pubblicato tour</h2>
-        <p class="text-muted mb-3">Crea il primo itinerario guidato per Siracusa.</p>
-        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('create_tour') }}">Crea tour</a>
+        <h2 class="h5 fw-bold">You have not planned any tours yet</h2>
+        <p class="text-muted mb-3">Create the first guided itinerary for Siracusa.</p>
+        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('create_tour') }}">Plan tour</a>
       </div>
     {% endfor %}
   </section>

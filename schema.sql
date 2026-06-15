@@ -1,6 +1,7 @@
 PRAGMA foreign_keys = ON;
 
 DROP TABLE IF EXISTS tour_reports;
+DROP TABLE IF EXISTS tour_likes;
 DROP TABLE IF EXISTS comments;
 DROP TABLE IF EXISTS reservations;
 DROP TABLE IF EXISTS tour_photos;
@@ -74,6 +75,16 @@ CREATE TABLE reservations (
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (tour_id) REFERENCES tours (id) ON DELETE CASCADE,
     UNIQUE (user_id, tour_id, tour_date)
+);
+
+CREATE TABLE tour_likes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tour_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (tour_id) REFERENCES tours (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    UNIQUE (tour_id, user_id)
 );
 
 CREATE TABLE comments (

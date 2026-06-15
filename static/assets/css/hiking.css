@@ -94,7 +94,7 @@ main h1, main h2, main h3 {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(20,61,41,0.1) 0%, rgba(20,61,41,0.6) 100%);
+  background: linear-gradient(180deg, rgba(20,61,41,0.08) 0%, rgba(20,61,41,0.78) 100%);
 }
 
 .hike-caption {
@@ -123,7 +123,13 @@ main h1, main h2, main h3 {
   letter-spacing: 0.02rem;
 }
 
-.hike-caption h3 { margin: 0; font-size: 1.15rem; font-weight:800; }
+.hike-caption h3 {
+  margin: 0;
+  color: var(--nature-white);
+  font-size: 1.15rem;
+  font-weight:800;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.32);
+}
 
 .hike-desc {
   position: absolute;

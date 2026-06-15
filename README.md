@@ -1,4 +1,4 @@
-# NatureS Siracusa - Free Walking Tours
+# Free Walking Tour Siracusa
 
 Web application per la simulazione d'esame di Introduction to Web Applications.
 Il progetto usa Flask, Flask-Login, SQLite, HTML5, CSS3 e Bootstrap.
@@ -9,6 +9,9 @@ La piattaforma gestisce Free Walking Tours nella citta di Siracusa. Le guide
 pubblicano itinerari con schedule settimanale, lingua, tappe, descrizione e 5
 foto promozionali. I partecipanti possono consultare i tour anche senza login,
 ma devono autenticarsi come partecipanti per prenotare una data.
+
+L'interfaccia del sito e in inglese statico. Titoli, descrizioni e contenuti
+scritti manualmente dalle guide non vengono tradotti automaticamente.
 
 ## Funzionalita principali
 
@@ -22,7 +25,9 @@ ma devono autenticarsi come partecipanti per prenotare una data.
 - Blocco sovrapposizioni nell'agenda della guida.
 - Tour visibili a tutti, anche senza login.
 - Filtri tour per data, durata, lingua e ricerca testuale.
-- Prenotazione concreta dal dettaglio tour.
+- Top 3 in homepage ordinata per like e commenti.
+- Like sui tour con un solo like per utente.
+- Prenotazione concreta dal dettaglio tour tramite agenda di date disponibili.
 - Redirect a login/registrazione se un visitatore non autenticato prova a prenotare.
 - Prenotazioni da 1 a 4 persone, con fino a 3 accompagnatori nominativi.
 - Controllo posti disponibili per specifica data.
@@ -32,7 +37,7 @@ ma devono autenticarsi come partecipanti per prenotare una data.
 - Cancellazione possibile solo almeno 24 ore prima dell'inizio del tour.
 - Profilo guida con tour creati, liste prenotazioni e partecipanti attesi per data.
 - Modifica tour consentita solo prima di qualsiasi prenotazione.
-- Report post-tour per date gia svolte con prenotazioni: presenti effettivi e foto prova.
+- Report post-tour unico per date gia svolte con prenotazioni: presenti effettivi e foto prova.
 - Commenti sui tour con badge Guida, Partecipante e Autore del tour.
 
 ## Credenziali campione
@@ -96,7 +101,7 @@ http://127.0.0.1:5000
 5. Aprire il profilo partecipante e verificare la prenotazione.
 6. Annullare una prenotazione futura quando mancano almeno 24 ore.
 7. Accedere come guida `lucia@siracusawalks.test`.
-8. Creare un nuovo tour e verificare il controllo sulle sovrapposizioni.
+8. Pianificare un nuovo tour e verificare il controllo sulle sovrapposizioni.
 9. Aprire il profilo guida e consultare le prenotazioni ricevute.
 10. Accedere come guida `marco@siracusawalks.test` e verificare il report post-tour del 2026-06-07.
 

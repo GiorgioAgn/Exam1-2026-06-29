@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-{% block title %}Accedi | NatureS Siracusa{% endblock %}
+{% block title %}Sign in | Free Walking Tour Siracusa{% endblock %}
 
 {% block content %}
 <main class="auth-page container-fluid px-3 px-lg-5 py-5 d-flex align-items-center justify-content-center">
   <section class="auth-card card border-0 shadow-sm rounded-4 p-4 p-lg-5">
     <div class="text-center mb-4">
-      <p class="section-label mb-2">Bentornato</p>
-      <h1 class="auth-title mb-0">Accedi</h1>
+      <p class="section-label mb-2">Welcome back</p>
+      <h1 class="auth-title mb-0">Sign in</h1>
     </div>
 
     <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
@@ -21,19 +21,19 @@
       </div>
 
       <div class="mb-4">
-        <label class="form-label small fw-bold" for="role">Tipo account</label>
+        <label class="form-label small fw-bold" for="role">Account type</label>
         <select id="role" name="role" class="form-select rounded-pill bg-light border-0 px-4 py-2" required>
-          <option value="participant">Partecipante</option>
-          <option value="guide">Guida</option>
+          <option value="participant">Participant</option>
+          <option value="guide">Guide</option>
         </select>
       </div>
 
-      <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Accedi</button>
+      <button type="submit" class="btn btn-dark w-100 rounded-pill py-2 fw-bold">Sign in</button>
     </form>
 
     <p class="text-center mt-4 mb-0 text-muted small">
-      Non hai un account?
-      <a href="{{ url_for('register') }}" class="text-dark fw-bold">Registrati</a>
+      Do not have an account?
+      <a href="{{ url_for('register') }}" class="text-dark fw-bold">Register</a>
     </p>
   </section>
 </main>
