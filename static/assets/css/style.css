@@ -408,6 +408,7 @@ a {
 }
 
 .footer-owner {
+  align-self: center;
   flex-shrink: 0;
   color: var(--brand-green-dark);
   font-weight: 700;
@@ -438,6 +439,7 @@ a {
   }
 
   .footer-owner {
+    align-self: flex-start;
     text-align: left;
   }
 }
