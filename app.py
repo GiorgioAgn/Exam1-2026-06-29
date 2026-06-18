@@ -12,7 +12,7 @@ from db import get_db_connection
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "super_chiave_segreta_esame")
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
@@ -531,9 +531,8 @@ def index():
     return render_template("index.html", tours=tours)
 
 
-@app.route("/hiking")
 @app.route("/tours")
-def hiking():
+def tours():
     filters = {
         "q": request.args.get("q", ""),
         "date": request.args.get("date", ""),
@@ -547,13 +546,13 @@ def hiking():
 
     conn = get_db_connection()
     try:
-        tours = filtered_tours(conn, filters)
+        tour_list = filtered_tours(conn, filters)
     except ValueError:
         flash("The date filter is not valid.", "warning")
         filters["date"] = ""
-        tours = filtered_tours(conn, filters)
+        tour_list = filtered_tours(conn, filters)
     conn.close()
-    return render_template("hiking.html", tours=tours, filters=filters)
+    return render_template("tours.html", tours=tour_list, filters=filters)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -1202,11 +1201,6 @@ def submit_report(tour_id, tour_date):
     finally:
         conn.close()
     return redirect(url_for("guide_profile"))
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html")
 
 
 if __name__ == "__main__":

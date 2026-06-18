@@ -119,11 +119,11 @@ def seed_sample_data(conn):
     )
 
     photos = [
-        "/static/assets/img/category-hiking.jpg",
         "/static/assets/img/category-trekking.jpg",
         "/static/assets/img/category-orienteering.jpg",
         "/static/assets/img/trail-forest.jpg",
         "/static/assets/img/trail-ridge.jpg",
+        "/static/assets/img/trail-lake.jpg",
     ]
     second_photos = [
         "/static/assets/img/trail-lake.jpg",
@@ -137,7 +137,7 @@ def seed_sample_data(conn):
         conn,
         guide_lucia,
         "Ortigia al tramonto",
-        "Storia e leggende",
+        "History and legends",
         "Fontana di Diana, Piazza Archimede",
         120,
         "Italian",
@@ -151,7 +151,7 @@ def seed_sample_data(conn):
         conn,
         guide_lucia,
         "Greek myths in Neapolis",
-        "Archeologia",
+        "Archaeology",
         "Ingresso Parco Archeologico della Neapolis",
         150,
         "English",
@@ -165,7 +165,7 @@ def seed_sample_data(conn):
         conn,
         guide_marco,
         "Sapori e mercati di Siracusa",
-        "Gastronomia",
+        "Food",
         "Tempio di Apollo",
         100,
         "Italian",
@@ -179,7 +179,7 @@ def seed_sample_data(conn):
         conn,
         guide_marco,
         "Meerblick und Barock",
-        "Architettura",
+        "Architecture",
         "Porta Marina",
         90,
         "German",
@@ -252,7 +252,7 @@ def seed_sample_data(conn):
         INSERT INTO tour_reports (tour_id, tour_date, actual_participants, evidence_photo)
         VALUES (?, ?, ?, ?)
         """,
-        (street_food, "2026-06-07", 2, "/static/assets/img/category-hiking.jpg"),
+        (street_food, "2026-06-07", 2, "/static/assets/img/trail-forest.jpg"),
     )
 
 
@@ -263,7 +263,7 @@ def init_db():
     seed_sample_data(conn)
     conn.commit()
     conn.close()
-    print("Database inizializzato con dati campione.")
+    print("Database initialized with sample data.")
 
 
 if __name__ == "__main__":

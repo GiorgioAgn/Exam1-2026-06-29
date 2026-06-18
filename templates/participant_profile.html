@@ -17,7 +17,11 @@
         <div class="profile-card-main">
           <div>
             <p class="section-label mb-1">{{ reservation.language }}</p>
-            <h2 class="h4 fw-bold mb-2">{{ reservation.title }}</h2>
+            <h2 class="h4 fw-bold mb-2">
+              <a class="profile-title-link" href="{{ url_for('tour_detail', id=reservation.tour_id) }}">
+                {{ reservation.title }}
+              </a>
+            </h2>
             <p class="mb-1">
               <i class="bi bi-calendar-event me-1"></i>
               {{ reservation.tour_date }} at {{ reservation.start_time }}
@@ -59,7 +63,7 @@
       <div class="empty-state">
         <h2 class="h5 fw-bold">No bookings</h2>
         <p class="text-muted mb-3">Choose a tour and book an available date.</p>
-        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('hiking') }}">Explore tours</a>
+        <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('tours') }}">Explore tours</a>
       </div>
     {% endfor %}
   </section>

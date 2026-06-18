@@ -3,7 +3,7 @@
 {% block title %}Tours | Free Walking Tour Siracusa{% endblock %}
 
 {% block extra_css %}
-<link href="{{ url_for('static', filename='assets/css/hiking.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='assets/css/tours.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -25,16 +25,16 @@
 
   <div class="row g-4">
     <aside class="col-lg-4 order-lg-2">
-      <div class="accordion hiking-sidebar" id="hikingSidebar">
+      <div class="accordion tours-sidebar" id="toursSidebar">
         <div class="accordion-item">
-          <h2 class="accordion-header" id="hikingFiltersHeading">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hikingFilters" aria-expanded="true" aria-controls="hikingFilters">
+          <h2 class="accordion-header" id="toursFiltersHeading">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#toursFilters" aria-expanded="true" aria-controls="toursFilters">
               Filters
             </button>
           </h2>
-          <div id="hikingFilters" class="accordion-collapse collapse show" aria-labelledby="hikingFiltersHeading" data-bs-parent="#hikingSidebar">
+          <div id="toursFilters" class="accordion-collapse collapse show" aria-labelledby="toursFiltersHeading" data-bs-parent="#toursSidebar">
             <div class="accordion-body">
-              <form action="{{ url_for('hiking') }}" method="get" class="filter-form">
+              <form action="{{ url_for('tours') }}" method="get" class="filter-form">
                 <div class="mb-3">
                   <label class="form-label small fw-bold" for="q">Search</label>
                   <input class="form-control rounded-pill bg-light border-0 px-4" id="q" name="q" type="search" value="{{ filters.q }}" placeholder="Title or theme">
@@ -67,7 +67,7 @@
 
                 <div class="d-flex gap-2">
                   <button class="btn btn-dark rounded-pill px-4" type="submit">Apply</button>
-                  <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('hiking') }}">Reset</a>
+                  <a class="btn btn-outline-secondary rounded-pill px-4" href="{{ url_for('tours') }}">Reset</a>
                 </div>
               </form>
             </div>
@@ -77,18 +77,18 @@
     </aside>
 
     <div class="col-lg-8 order-lg-1">
-      <div class="row hike-grid g-3">
+      <div class="row tour-grid g-3">
         {% for tour in tours %}
           <div class="col-12 col-sm-6">
-            <a class="hike-card" href="{{ url_for('tour_detail', id=tour.id) }}">
+            <a class="tour-card" href="{{ url_for('tour_detail', id=tour.id) }}">
               <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
-              <div class="hike-caption">
-                <span class="hike-likes badge rounded-pill text-bg-dark">
+              <div class="tour-card-caption">
+                <span class="tour-card-likes badge rounded-pill text-bg-dark">
                   <i class="bi bi-heart-fill me-1"></i>{{ tour.like_count }} / {{ tour.language }}
                 </span>
                 <h3>{{ tour.title }}</h3>
               </div>
-              <div class="hike-desc">
+              <div class="tour-card-details">
                 <p class="mb-1">{{ tour.duration_mins }} min / {{ tour.theme }}</p>
                 <p class="small mb-2">Guide: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
                 <p class="small mb-0">{{ tour.schedule_label }}</p>

@@ -2,7 +2,7 @@
 {% block title %}{{ tour.title }} | Free Walking Tour Siracusa{% endblock %}
 
 {% block extra_css %}
-<link href="{{ url_for('static', filename='assets/css/post-hiking-1.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='assets/css/tour-detail.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('hiking') }}">Tours</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('tours') }}">Tours</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ tour.title }}</li>
     </ol>
   </nav>
@@ -49,9 +49,9 @@
       </div>
     </header>
 
-    <section class="post-hero mb-4">
+    <section class="tour-hero mb-4">
       <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
-      <div class="post-hero-overlay">
+      <div class="tour-hero-overlay">
         <p class="section-label mb-2">Meeting point</p>
         <h2>{{ tour.meeting_point }}</h2>
         <p class="mb-0">Guide: {{ tour.guide_first_name }} {{ tour.guide_last_name }}</p>
@@ -60,7 +60,7 @@
 
     <div class="row g-5">
       <div class="col-lg-7">
-        <section class="post-content mb-5">
+        <section class="tour-content mb-5">
           <h2 class="h5 fw-bold">Description</h2>
           <p class="pre-wrap">{{ tour.description }}</p>
 

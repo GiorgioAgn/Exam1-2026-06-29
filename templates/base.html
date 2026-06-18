@@ -18,7 +18,7 @@
           <div class="navbar-desktop d-none d-lg-grid align-items-center">
             <div class="nav-left d-flex align-items-center gap-3">
               <a class="nav-link" href="{{ url_for('index') }}">Home</a>
-              <form class="search-box m-0" role="search" action="{{ url_for('hiking') }}" method="get">
+              <form class="search-box m-0" role="search" action="{{ url_for('tours') }}" method="get">
                 <div class="input-group rounded-pill overflow-hidden">
                   <span class="input-group-text"><i class="bi bi-search"></i></span>
                   <input class="form-control" name="q" type="search" placeholder="Search tours" aria-label="Search tours">
@@ -29,7 +29,7 @@
             <a class="site-brand m-0" href="{{ url_for('index') }}">Free Walking Tour Siracusa</a>
 
             <div class="nav-right d-flex align-items-center justify-content-end gap-3">
-              <a class="nav-link" href="{{ url_for('hiking') }}">Tours</a>
+              <a class="nav-link" href="{{ url_for('tours') }}">Tours</a>
               {% if current_user.is_authenticated and current_user.role == 'guide' %}
                 <a class="nav-link fw-bold text-success" href="{{ url_for('create_tour') }}">Plan</a>
               {% endif %}
@@ -95,7 +95,7 @@
             <div class="collapse navbar-collapse mt-3" id="mainNavMobile">
               <ul class="navbar-nav text-center gap-2">
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('hiking') }}">Tours</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('tours') }}">Tours</a></li>
                 {% if current_user.is_authenticated and current_user.role == 'guide' %}
                   <li class="nav-item"><a class="nav-link text-success fw-bold" href="{{ url_for('create_tour') }}">Plan</a></li>
                 {% endif %}
@@ -103,7 +103,7 @@
                   <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
                 {% endif %}
               </ul>
-              <form class="search-box mobile-search mt-3" role="search" action="{{ url_for('hiking') }}" method="get">
+              <form class="search-box mobile-search mt-3" role="search" action="{{ url_for('tours') }}" method="get">
                 <div class="input-group rounded-pill overflow-hidden">
                   <span class="input-group-text"><i class="bi bi-search"></i></span>
                   <input class="form-control" name="q" type="search" placeholder="Search tours" aria-label="Search tours">
@@ -129,6 +129,19 @@
     </div>
 
     {% block content %}{% endblock %}
+
+    <footer class="site-footer">
+      <div class="container-fluid px-3 px-lg-5 py-3">
+        <div class="footer-content">
+          <p class="mb-0">
+            <a target="_blank" rel="noopener" href="https://icons8.com/icon/cV1jPimNOSK3/user">utente</a>
+            icon by
+            <a target="_blank" rel="noopener" href="https://icons8.com">Icons8</a>
+          </p>
+          <p class="mb-0 fw-semibold">322607 Giorgio Agnello</p>
+        </div>
+      </div>
+    </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     {% block scripts %}{% endblock %}
