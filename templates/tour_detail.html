@@ -50,7 +50,14 @@
     </header>
 
     <section class="tour-hero mb-4">
-      <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
+      {% if photos %}
+        <button class="tour-hero-image photo-viewer-trigger" type="button" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo-index="0" aria-label="Open photo gallery for {{ tour.title }}">
+          <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
+        </button>
+        <span class="photo-zoom-hint"><i class="bi bi-arrows-fullscreen me-1"></i>View photos</span>
+      {% else %}
+        <img src="{{ tour.primary_photo }}" alt="{{ tour.title }}">
+      {% endif %}
       <div class="tour-hero-overlay">
         <p class="section-label mb-2">Meeting point</p>
         <h2>{{ tour.meeting_point }}</h2>
@@ -95,7 +102,9 @@
           <h2 id="gallery-title" class="h5 fw-bold mb-3">Promotional photos</h2>
           <div class="tour-gallery">
             {% for photo in photos %}
-              <img src="{{ photo.path }}" alt="Photo {{ loop.index }} of {{ tour.title }}">
+              <button class="gallery-photo-button photo-viewer-trigger" type="button" data-bs-toggle="modal" data-bs-target="#photoModal" data-photo-index="{{ loop.index0 }}" aria-label="Open photo {{ loop.index }} of {{ tour.title }}">
+                <img src="{{ photo.path }}" alt="Photo {{ loop.index }} of {{ tour.title }}">
+              </button>
             {% endfor %}
           </div>
         </section>
@@ -119,7 +128,9 @@
 
           {% for comment in comments %}
             <article class="comment-item mb-4 pb-4 border-bottom d-flex gap-3">
-              <img class="avatar rounded-circle comment-avatar" src="{{ url_for('static', filename='assets/img/user2.png') }}" alt="Avatar">
+              <div class="comment-avatar avatar-tone-{{ comment.user_id % 5 }} rounded-circle" aria-hidden="true">
+                {{ comment.first_name[:1] }}{{ comment.last_name[:1] }}
+              </div>
               <div>
                 <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
                   <h3 class="h6 fw-bold mb-0">{{ comment.first_name }} {{ comment.last_name }}</h3>
@@ -209,11 +220,64 @@
       </aside>
     </div>
   </article>
+
+  {% if photos %}
+    <div class="modal fade photo-modal" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 overflow-hidden">
+          <div class="modal-header border-0">
+            <h2 class="modal-title fs-6 fw-bold" id="photoModalLabel">{{ tour.title }} photos</h2>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-0">
+            <div id="photoCarousel" class="carousel slide" data-bs-interval="false" data-bs-touch="true">
+              <div class="carousel-inner">
+                {% for photo in photos %}
+                  <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <img src="{{ photo.path }}" class="d-block w-100" alt="Photo {{ loop.index }} of {{ tour.title }}">
+                    <div class="carousel-caption photo-counter">
+                      <span>{{ loop.index }} / {{ photos|length }}</span>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+
+              {% if photos|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous photo</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next photo</span>
+                </button>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </main>
 {% endblock %}
 
 {% block scripts %}
 <script>
+  const photoCarouselEl = document.getElementById('photoCarousel');
+  if (photoCarouselEl) {
+    const photoCarousel = bootstrap.Carousel.getOrCreateInstance(photoCarouselEl, {
+      interval: false,
+      ride: false,
+      touch: true
+    });
+
+    document.querySelectorAll('[data-photo-index]').forEach((button) => {
+      button.addEventListener('click', () => {
+        photoCarousel.to(Number(button.dataset.photoIndex || 0));
+      });
+    });
+  }
+
   const agendaInputs = document.querySelectorAll('input[name="tour_date"]');
   const peopleInput = document.getElementById('numPeople');
   const seatHint = document.getElementById('seatHint');
