@@ -387,7 +387,7 @@ a {
   color: rgba(31, 42, 36, 0.72);
   border-top: 1px solid rgba(31, 95, 59, 0.12);
   background: rgba(232, 238, 226, 0.64);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
 }
 
 .site-footer a {
@@ -397,9 +397,21 @@ a {
 
 .footer-content {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
+}
+
+.footer-disclaimer {
+  max-width: 920px;
+  line-height: 1.45;
+}
+
+.footer-owner {
+  flex-shrink: 0;
+  color: var(--brand-green-dark);
+  font-weight: 700;
+  text-align: right;
 }
 
 /* Responsive */
@@ -423,5 +435,9 @@ a {
     align-items: flex-start;
     flex-direction: column;
     gap: 6px;
+  }
+
+  .footer-owner {
+    text-align: left;
   }
 }

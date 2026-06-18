@@ -40,32 +40,6 @@ scritti manualmente dalle guide non vengono tradotti automaticamente.
 - Report post-tour unico per date gia svolte con prenotazioni: presenti effettivi e foto prova.
 - Commenti sui tour con badge Guida, Partecipante e Autore del tour.
 
-## Credenziali campione
-
-Tutte le password sono:
-
-```text
-password123
-```
-
-Guide:
-
-```text
-lucia@siracusawalks.test
-marco@siracusawalks.test
-```
-
-Partecipanti:
-
-```text
-anna@example.test
-paolo@example.test
-lucia@siracusawalks.test
-```
-
-Nota: `lucia@siracusawalks.test` esiste sia come guida sia come partecipante.
-Per questo motivo il login richiede anche il tipo account.
-
 ## Come avviare il progetto
 
 Installare le dipendenze:
@@ -74,7 +48,7 @@ Installare le dipendenze:
 pip install -r requirements.txt
 ```
 
-Inizializzare il database con dati campione:
+Inizializzare il database vuoto:
 
 ```bash
 python db.py
@@ -94,22 +68,21 @@ http://127.0.0.1:5000
 
 ## Flussi consigliati per il test
 
-1. Visitare la homepage senza login e aprire un tour.
-2. Provare a prenotare senza login: il sito propone login o registrazione.
-3. Accedere come partecipante `anna@example.test`.
-4. Prenotare una data disponibile dal dettaglio tour.
-5. Aprire il profilo partecipante e verificare la prenotazione.
-6. Annullare una prenotazione futura quando mancano almeno 24 ore.
-7. Accedere come guida `lucia@siracusawalks.test`.
-8. Pianificare un nuovo tour e verificare il controllo sulle sovrapposizioni.
-9. Aprire il profilo guida e consultare le prenotazioni ricevute.
-10. Accedere come guida `marco@siracusawalks.test` e verificare il report post-tour del 2026-06-07.
+1. Registrare un account guida e selezionare almeno una lingua parlata.
+2. Accedere come guida e pianificare un tour con schedule, tappe e 5 foto.
+3. Visitare homepage e pagina Tours senza login per verificare la consultazione pubblica.
+4. Provare a prenotare senza login: il sito propone login o registrazione.
+5. Registrare un account partecipante.
+6. Accedere come partecipante e prenotare una data disponibile dal dettaglio tour.
+7. Aprire il profilo partecipante e verificare la prenotazione.
+8. Annullare una prenotazione futura quando mancano almeno 24 ore.
+9. Accedere come guida e consultare prenotazioni ricevute e partecipanti attesi.
 
 ## Struttura principale
 
 ```text
 app.py                 Rotte Flask, validazioni e regole applicative
-db.py                  Connessione SQLite e seed dati campione
+db.py                  Connessione SQLite e inizializzazione database vuoto
 schema.sql             Schema relazionale
 database.db            Database SQLite consegnabile
 templates/             Template Jinja
@@ -117,6 +90,7 @@ static/assets/css/     Stili CSS custom
 static/assets/img/     Immagini statiche
 static/uploads/        Upload di tour e report
 requirements.txt       Dipendenze Python
+GUIDA_PROGETTO.md      Guida completa a funzioni, architettura e scelte progettuali
 ```
 
 ## Deployment
