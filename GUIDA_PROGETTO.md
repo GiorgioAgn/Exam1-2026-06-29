@@ -276,7 +276,7 @@ Motivo per cui non e stata scelta: il requisito voleva permettere alla stessa em
 - meeting point;
 - guida;
 - numero persone;
-- eventuali accompagnatori;
+- eventuali accompagnatori con nome e cognome;
 - pulsante di cancellazione se mancano almeno 24 ore.
 
 Il titolo del tour e cliccabile e porta al dettaglio.
@@ -480,7 +480,7 @@ Le tappe e le foto sono separate dal tour.
 Motivo:
 
 - un tour ha piu tappe;
-- un tour ha esattamente cinque foto;
+- un tour ha almeno cinque foto;
 - ogni elemento ha una posizione.
 
 ### Tabella `reservations`
@@ -491,7 +491,7 @@ Contiene:
 - tour;
 - data specifica;
 - numero persone;
-- accompagnatori;
+- accompagnatori con nome e cognome;
 - stato;
 - eventuale data cancellazione.
 
@@ -608,7 +608,7 @@ Motivo per cui non e stata scelta: un redirect libero potrebbe portare fuori dal
 ## Flusso Creazione Tour
 
 1. La guida apre `/create-tour`.
-2. Il form richiede titolo, tema, meeting point, lingua, durata, capienza, schedule, tappe, descrizione e cinque foto.
+2. Il form richiede titolo, tema, meeting point, lingua, durata, capienza, schedule, tappe, descrizione e almeno cinque foto.
 3. Il backend controlla:
    - ruolo guida;
    - lingua tra quelle parlate dalla guida;
@@ -616,7 +616,7 @@ Motivo per cui non e stata scelta: un redirect libero potrebbe portare fuori dal
    - capienza tra 1 e 40;
    - almeno una tappa;
    - almeno un giorno/orario;
-   - esattamente cinque foto;
+   - almeno cinque foto promozionali;
    - nessuna sovrapposizione nell'agenda guida.
 4. Se tutto e valido, crea il tour e poi inserisce schedule, tappe e foto.
 
@@ -628,19 +628,31 @@ Alternativa valutata: salvare prima il tour e poi chiedere tappe/foto in pagine 
 
 Motivo per cui non e stata scelta: avrebbe spezzato troppo il flusso. Per una guida e piu naturale pianificare tutto da un solo form.
 
+Le foto vengono caricate con un unico campo multiplo.
+
+Alternativa valutata: cinque campi file separati.
+
+Motivo per cui non e stata scelta: il controllo nativo del browser puo mostrare testo localizzato dal sistema operativo, come "Scegli file". Un campo multiplo con pulsante custom mantiene l'interfaccia in inglese e rende piu rapido il caricamento.
+
+Durante la modifica del tour, le foto correnti vengono mostrate come miniature. La guida puo marcarne una o piu per la rimozione e caricare nuove foto nella stessa schermata. Il backend accetta il salvataggio solo se il totale finale resta di almeno cinque foto.
+
 ## Modifica Tour
 
-Una guida puo modificare un tour solo se non esistono prenotazioni.
+La modifica generale del tour e consentita solo se non esistono prenotazioni attive.
 
-Motivo: cambiare orari, lingua, durata o capienza dopo una prenotazione potrebbe rendere incoerente l'impegno preso dal partecipante.
+Motivo: cambiare lingua, durata, capienza, tappe o schedule generale dopo una prenotazione attiva potrebbe rendere incoerente l'impegno preso dal partecipante.
 
 ### Scelta progettuale
 
-La modifica e bloccata appena esiste almeno una prenotazione.
+Le prenotazioni cancellate non bloccano piu la modifica generale, perche non occupano posti e non rappresentano un impegno attivo.
 
-Alternativa valutata: bloccare solo la singola data prenotata.
+Alternativa valutata: bloccare il tour anche in presenza di prenotazioni cancellate.
 
-Motivo per cui non e stata scelta: avrebbe richiesto una gestione piu complessa, perche un tour ha schedule settimanale e una modifica potrebbe influire su piu date future. Il blocco completo e piu semplice e sicuro.
+Motivo per cui non e stata scelta: sarebbe troppo rigido. Se tutti i partecipanti cancellano, la guida deve poter aggiornare il tour.
+
+Alternativa valutata: gestire modifiche diverse per singola data futura.
+
+Motivo per cui non e stata scelta: avrebbe richiesto un secondo livello di calendario e piu regole speciali. Per questo progetto e piu chiaro mantenere un solo schedule settimanale per tour.
 
 ## Flusso Prenotazione
 
@@ -649,7 +661,7 @@ Motivo per cui non e stata scelta: avrebbe richiesto una gestione piu complessa,
 3. Ogni data mostra orario e posti rimasti.
 4. Il partecipante sceglie una data.
 5. Inserisce numero persone da 1 a 4.
-6. Se ci sono accompagnatori, inserisce i nomi.
+6. Se ci sono accompagnatori, inserisce nome e cognome per ciascuno.
 7. Il backend controlla:
    - utente autenticato;
    - ruolo partecipante;
@@ -657,7 +669,7 @@ Motivo per cui non e stata scelta: avrebbe richiesto una gestione piu complessa,
    - data prevista dallo schedule;
    - tour non gia iniziato;
    - numero persone valido;
-   - nomi accompagnatori coerenti;
+   - numero e formato dei full names degli accompagnatori;
    - posti disponibili;
    - nessuna sovrapposizione nell'agenda partecipante;
    - nessuna prenotazione duplicata per stesso tour e data.
@@ -853,7 +865,7 @@ Motivo per cui non e stata scelta: in deploy e consegna e preferibile dimostrare
 
 1. Registrare una guida.
 2. Accedere come guida.
-3. Pianificare un tour con cinque foto.
+3. Pianificare un tour con almeno cinque foto.
 4. Aprire homepage e Tours senza login.
 5. Registrare un partecipante.
 6. Aprire il dettaglio tour.

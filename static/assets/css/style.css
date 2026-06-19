@@ -138,6 +138,12 @@ a {
   justify-self: end;
 }
 
+.mobile-search {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 320px;
+}
+
 /* Homepage */
 
 .homepage-intro {
@@ -270,6 +276,93 @@ a {
   grid-template-columns: 1fr 130px;
   align-items: center;
   gap: 12px;
+}
+
+.photo-upload-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 72px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.photo-upload-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.photo-file-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.photo-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(244, 241, 234, 0.92);
+}
+
+.photo-file-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--brand-green-dark);
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-file-remove {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.current-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 12px;
+}
+
+.current-photo-card {
+  padding: 8px;
+  border: 1px solid rgba(31, 95, 59, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  transition: border-color 160ms ease, opacity 160ms ease;
+}
+
+.current-photo-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.current-photo-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.current-photo-card.is-marked {
+  border-color: rgba(180, 35, 24, 0.34);
+  background: rgba(255, 241, 238, 0.82);
+}
+
+.current-photo-card.is-marked img {
+  opacity: 0.46;
+  filter: grayscale(0.3);
 }
 
 .form-card {
@@ -420,6 +513,16 @@ a {
 @media (max-width: 767px) {
   .schedule-row {
     grid-template-columns: 1fr;
+  }
+
+  .photo-upload-box {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .current-photo-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .profile-card-main,

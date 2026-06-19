@@ -9,7 +9,7 @@
         <p class="section-label mb-2">Guide dashboard</p>
         <h1 class="homepage-title mb-3">{% if tour %}Edit Tour{% else %}Plan a Tour{% endif %}</h1>
         <p class="homepage-text mx-auto text-muted">
-          Each tour must include a weekly schedule, language, stops, description and five promotional photos.
+          Each tour must include a weekly schedule, language, stops, description and at least five promotional photos.
         </p>
       </header>
 
@@ -83,16 +83,35 @@
             <legend class="form-label small fw-bold mb-3">
               Promotional photos
               {% if tour %}
-                <span class="text-muted fw-normal">/ leave empty to keep current photos</span>
+                <span class="text-muted fw-normal">/ keep, remove or add photos</span>
               {% endif %}
             </legend>
-            <div class="row g-3">
-              {% for index in range(1, 6) %}
-                <div class="col-md-6">
-                  <label class="form-label small" for="photo{{ index }}">Photo {{ index }}</label>
-                  <input id="photo{{ index }}" type="file" name="photo{{ index }}" class="form-control rounded-pill border-0" accept="image/*" {% if not tour %}required{% endif %}>
-                </div>
-              {% endfor %}
+            {% if tour and current_photos %}
+              <div class="current-photo-grid mb-3">
+                {% for photo in current_photos %}
+                  <div class="current-photo-card" data-current-photo-card>
+                    <img src="{{ photo.path }}" alt="Current photo {{ loop.index }} for {{ tour.title }}">
+                    <input class="current-photo-check visually-hidden" id="removePhoto{{ photo.id }}" type="checkbox" name="remove_photos" value="{{ photo.id }}">
+                    <div class="current-photo-actions">
+                      <span class="small fw-bold">Photo {{ loop.index }}</span>
+                      <button class="btn btn-sm btn-outline-danger rounded-pill current-photo-toggle" type="button" data-remove-photo-toggle data-target="removePhoto{{ photo.id }}">
+                        <i class="bi bi-trash me-1"></i>Remove
+                      </button>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            <div class="photo-upload-box">
+              <input id="photos" class="visually-hidden" type="file" name="photos" accept="image/*" multiple data-required-min="{% if tour %}false{% else %}true{% endif %}">
+              <label class="btn btn-outline-success rounded-pill px-4 mb-0" for="photos">
+                <i class="bi bi-images me-1"></i>Choose photos
+              </label>
+              <div class="photo-upload-summary">
+                <p class="mb-1 fw-bold">Upload at least 5 photos</p>
+                <p class="small text-muted mb-0" id="photoSelection">No photos selected</p>
+                <ul class="photo-file-list list-unstyled mb-0" id="photoList"></ul>
+              </div>
             </div>
           </fieldset>
 
@@ -121,5 +140,105 @@
 
   scheduleChecks.forEach((checkbox) => checkbox.addEventListener('change', syncScheduleRequirements));
   syncScheduleRequirements();
+
+  const photoInput = document.getElementById('photos');
+  const photoSelection = document.getElementById('photoSelection');
+  const photoList = document.getElementById('photoList');
+  const currentPhotoChecks = document.querySelectorAll('.current-photo-check');
+  const currentPhotoButtons = document.querySelectorAll('[data-remove-photo-toggle]');
+
+  function removedCurrentPhotoCount() {
+    return Array.from(currentPhotoChecks).filter((checkbox) => checkbox.checked).length;
+  }
+
+  function syncCurrentPhotoButtons() {
+    currentPhotoButtons.forEach((button) => {
+      const checkbox = document.getElementById(button.dataset.target);
+      const card = button.closest('[data-current-photo-card]');
+      if (!checkbox || !card) {
+        return;
+      }
+      card.classList.toggle('is-marked', checkbox.checked);
+      button.classList.toggle('btn-outline-danger', !checkbox.checked);
+      button.classList.toggle('btn-outline-dark', checkbox.checked);
+      button.setAttribute('aria-pressed', String(checkbox.checked));
+      button.innerHTML = checkbox.checked
+        ? '<i class="bi bi-arrow-counterclockwise me-1"></i>Undo'
+        : '<i class="bi bi-trash me-1"></i>Remove';
+    });
+  }
+
+  function replacePhotoFiles(files) {
+    const transfer = new DataTransfer();
+    files.forEach((file) => transfer.items.add(file));
+    photoInput.files = transfer.files;
+    syncPhotoSelection();
+  }
+
+  function syncPhotoSelection() {
+    if (!photoInput || !photoSelection || !photoList) {
+      return;
+    }
+    const count = photoInput.files.length;
+    photoList.innerHTML = '';
+
+    if (count === 0) {
+      photoSelection.textContent = 'No photos selected';
+    } else if (count === 1) {
+      photoSelection.textContent = '1 photo selected';
+    } else {
+      photoSelection.textContent = `${count} photos selected`;
+    }
+
+    Array.from(photoInput.files).forEach((file, index) => {
+      const item = document.createElement('li');
+      item.className = 'photo-file-item';
+
+      const name = document.createElement('span');
+      name.className = 'photo-file-name';
+      name.textContent = file.name;
+
+      const removeButton = document.createElement('button');
+      removeButton.className = 'btn btn-sm btn-outline-danger rounded-pill photo-file-remove';
+      removeButton.type = 'button';
+      removeButton.setAttribute('aria-label', `Remove ${file.name}`);
+      removeButton.innerHTML = '<i class="bi bi-x-lg"></i>';
+      removeButton.addEventListener('click', () => {
+        const remainingFiles = Array.from(photoInput.files).filter((_, fileIndex) => fileIndex !== index);
+        replacePhotoFiles(remainingFiles);
+      });
+
+      item.append(name, removeButton);
+      photoList.appendChild(item);
+    });
+
+    const mustUpload = photoInput.dataset.requiredMin === 'true';
+    const finalPhotoCount = currentPhotoChecks.length - removedCurrentPhotoCount() + count;
+    if (mustUpload && count < 5) {
+      photoInput.setCustomValidity('Upload at least 5 photos.');
+    } else if (!mustUpload && (count > 0 || removedCurrentPhotoCount() > 0) && finalPhotoCount < 5) {
+      photoInput.setCustomValidity('A tour must keep at least 5 photos.');
+    } else {
+      photoInput.setCustomValidity('');
+    }
+  }
+
+  currentPhotoButtons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const checkbox = document.getElementById(button.dataset.target);
+      if (!checkbox) {
+        return;
+      }
+      checkbox.checked = !checkbox.checked;
+      syncCurrentPhotoButtons();
+      syncPhotoSelection();
+    });
+  });
+  syncCurrentPhotoButtons();
+
+  if (photoInput) {
+    photoInput.addEventListener('change', syncPhotoSelection);
+    syncPhotoSelection();
+  }
 </script>
 {% endblock %}

@@ -42,7 +42,7 @@
                 <i class="bi bi-pencil me-1"></i>Edit
               </a>
             {% else %}
-              <span class="badge text-bg-secondary rounded-pill p-3">Editing locked: reservations exist</span>
+              <span class="badge text-bg-secondary rounded-pill p-3">Editing locked: active bookings exist</span>
             {% endif %}
           </div>
         {% endif %}
@@ -205,8 +205,9 @@
               </div>
 
               <div class="mb-4">
-                <label class="form-label small fw-bold" for="extraNames">Guest names</label>
-                <textarea id="extraNames" name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="3" placeholder="One name for each guest, separated by commas or new lines"></textarea>
+                <label class="form-label small fw-bold" for="extraNames">Guest full names</label>
+                <textarea id="extraNames" name="extra_names" class="form-control rounded-4 bg-light border-0 p-3" rows="3" placeholder="One full name for each guest, separated by commas or new lines"></textarea>
+                <p class="small text-muted mt-2 mb-0">Use first name and last name for every guest.</p>
               </div>
 
               <button type="submit" class="btn btn-dark w-100 rounded-pill py-2">Confirm booking</button>
@@ -280,7 +281,35 @@
 
   const agendaInputs = document.querySelectorAll('input[name="tour_date"]');
   const peopleInput = document.getElementById('numPeople');
+  const guestNamesInput = document.getElementById('extraNames');
   const seatHint = document.getElementById('seatHint');
+
+  function parseGuestNames(value) {
+    return (value || '')
+      .replace(/\n/g, ',')
+      .split(',')
+      .map((name) => name.trim())
+      .filter(Boolean);
+  }
+
+  function hasFirstAndLastName(value) {
+    return value.split(/\s+/).filter(Boolean).length >= 2;
+  }
+
+  function syncGuestNameValidation() {
+    if (!peopleInput || !guestNamesInput) {
+      return;
+    }
+    const expectedGuests = Math.max(0, Number(peopleInput.value || 1) - 1);
+    const names = parseGuestNames(guestNamesInput.value);
+    if (names.length !== expectedGuests) {
+      guestNamesInput.setCustomValidity(`Enter exactly ${expectedGuests} guest full name(s).`);
+    } else if (names.some((name) => !hasFirstAndLastName(name))) {
+      guestNamesInput.setCustomValidity('Enter first name and last name for each guest.');
+    } else {
+      guestNamesInput.setCustomValidity('');
+    }
+  }
 
   function syncSeatLimit() {
     if (!agendaInputs.length || !peopleInput) {
@@ -302,9 +331,17 @@
     if (seatHint) {
       seatHint.textContent = `${seats} seats available for the selected date.`;
     }
+    syncGuestNameValidation();
   }
 
   agendaInputs.forEach((input) => input.addEventListener('change', syncSeatLimit));
+  if (peopleInput) {
+    peopleInput.addEventListener('input', syncGuestNameValidation);
+  }
+  if (guestNamesInput) {
+    guestNamesInput.addEventListener('input', syncGuestNameValidation);
+  }
   syncSeatLimit();
+  syncGuestNameValidation();
 </script>
 {% endblock %}

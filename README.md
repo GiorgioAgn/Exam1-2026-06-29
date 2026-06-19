@@ -6,8 +6,8 @@ Il progetto usa Flask, Flask-Login, SQLite, HTML5, CSS3 e Bootstrap.
 ## Tema
 
 La piattaforma gestisce Free Walking Tours nella citta di Siracusa. Le guide
-pubblicano itinerari con schedule settimanale, lingua, tappe, descrizione e 5
-foto promozionali. I partecipanti possono consultare i tour anche senza login,
+pubblicano itinerari con schedule settimanale, lingua, tappe, descrizione e almeno
+5 foto promozionali. I partecipanti possono consultare i tour anche senza login,
 ma devono autenticarsi come partecipanti per prenotare una data.
 
 L'interfaccia del sito e in inglese statico. Titoli, descrizioni e contenuti
@@ -29,14 +29,14 @@ scritti manualmente dalle guide non vengono tradotti automaticamente.
 - Like sui tour con un solo like per utente.
 - Prenotazione concreta dal dettaglio tour tramite agenda di date disponibili.
 - Redirect a login/registrazione se un visitatore non autenticato prova a prenotare.
-- Prenotazioni da 1 a 4 persone, con fino a 3 accompagnatori nominativi.
+- Prenotazioni da 1 a 4 persone, con nome e cognome per ogni accompagnatore.
 - Controllo posti disponibili per specifica data.
 - Blocco sovrapposizioni nell'agenda del partecipante.
 - Blocco prenotazioni nel passato o su date non previste dallo schedule.
 - Profilo partecipante con prenotazioni e cancellazione.
 - Cancellazione possibile solo almeno 24 ore prima dell'inizio del tour.
 - Profilo guida con tour creati, liste prenotazioni e partecipanti attesi per data.
-- Modifica tour consentita solo prima di qualsiasi prenotazione.
+- Modifica tour consentita solo quando non ci sono prenotazioni attive.
 - Report post-tour unico per date gia svolte con prenotazioni: presenti effettivi e foto prova.
 - Commenti sui tour con badge Guida, Partecipante e Autore del tour.
 
@@ -69,7 +69,7 @@ http://127.0.0.1:5000
 ## Flussi consigliati per il test
 
 1. Registrare un account guida e selezionare almeno una lingua parlata.
-2. Accedere come guida e pianificare un tour con schedule, tappe e 5 foto.
+2. Accedere come guida e pianificare un tour con schedule, tappe e almeno 5 foto.
 3. Visitare homepage e pagina Tours senza login per verificare la consultazione pubblica.
 4. Provare a prenotare senza login: il sito propone login o registrazione.
 5. Registrare un account partecipante.

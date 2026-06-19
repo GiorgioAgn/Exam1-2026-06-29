@@ -109,6 +109,18 @@ def save_uploaded_file(file, prefix):
     return f"/static/uploads/{filename}"
 
 
+def delete_uploaded_file(path):
+    if not path or not path.startswith("/static/uploads/"):
+        return
+    upload_root = os.path.abspath(app.config["UPLOAD_FOLDER"])
+    filename = secure_filename(os.path.basename(path))
+    file_path = os.path.abspath(os.path.join(upload_root, filename))
+    if os.path.commonpath([upload_root, file_path]) != upload_root:
+        return
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+
 def parse_positive_int(value, label, min_value=1, max_value=None):
     try:
         parsed = int(value)
@@ -127,6 +139,18 @@ def parse_time_to_minutes(value):
     except (TypeError, ValueError):
         raise ValueError("Invalid time.")
     return parsed.hour * 60 + parsed.minute
+
+
+def minutes_to_time_label(total_minutes):
+    hours = (total_minutes // 60) % 24
+    minutes = total_minutes % 60
+    return f"{hours:02d}:{minutes:02d}"
+
+
+def time_range_label(start_time, duration_mins):
+    start_minutes = parse_time_to_minutes(start_time)
+    end_minutes = start_minutes + duration_mins
+    return f"{minutes_to_time_label(start_minutes)} to {minutes_to_time_label(end_minutes)}"
 
 
 def ranges_overlap(start_a, duration_a, start_b, duration_b):
@@ -149,6 +173,10 @@ def tour_datetime(tour_date, start_time):
 def split_names(value):
     raw = (value or "").replace("\n", ",")
     return [name.strip() for name in raw.split(",") if name.strip()]
+
+
+def has_first_and_last_name(value):
+    return len([part for part in value.split() if part.strip()]) >= 2
 
 
 def safe_redirect(default_endpoint="index"):
@@ -266,9 +294,13 @@ def available_places(conn, tour, tour_date):
     return tour["max_participants"] - active_reserved_places(conn, tour["id"], tour_date)
 
 
-def tour_has_any_reservations(conn, tour_id):
+def tour_has_active_reservations(conn, tour_id):
     row = conn.execute(
-        "SELECT COUNT(*) AS total FROM reservations WHERE tour_id = ?",
+        """
+        SELECT COUNT(*) AS total
+        FROM reservations
+        WHERE tour_id = ? AND status = 'booked'
+        """,
         (tour_id,),
     ).fetchone()
     return row["total"] > 0
@@ -348,7 +380,7 @@ def enrich_tour(conn, row, selected_date=None):
     tour["schedule"] = get_schedules(conn, tour["id"])
     tour["schedule_label"] = format_schedule(tour["schedule"])
     tour["primary_photo"] = primary_photo(conn, tour["id"])
-    tour["can_edit"] = not tour_has_any_reservations(conn, tour["id"])
+    tour["can_edit"] = not tour_has_active_reservations(conn, tour["id"])
     tour["like_count"] = tour_like_count(conn, tour["id"])
     tour["comment_count"] = tour_comment_count(conn, tour["id"])
     tour["is_liked"] = current_user_liked(conn, tour["id"])
@@ -468,7 +500,8 @@ def parse_tour_form(conn, exclude_tour_id=None):
             if overlap:
                 errors.append(
                     f"Schedule overlap: {WEEKDAY_NAMES[schedule['weekday']]} "
-                    f"{schedule['start_time']} overlaps with '{overlap['title']}'."
+                    f"{schedule['start_time']} overlaps with '{overlap['title']}' "
+                    f"from {time_range_label(overlap['start_time'], overlap['duration_mins'])}."
                 )
 
     return {
@@ -485,19 +518,41 @@ def parse_tour_form(conn, exclude_tour_id=None):
 
 
 def get_form_photo_files():
-    return [request.files.get(f"photo{i}") for i in range(1, 6)]
+    return [file for file in request.files.getlist("photos") if file and file.filename]
 
 
-def validate_five_photos(files, required):
-    provided = [file for file in files if file and file.filename]
-    if required and len(provided) != 5:
-        return "You must upload exactly 5 promotional photos."
-    if not required and provided and len(provided) != 5:
-        return "To replace photos, upload exactly 5 new photos."
-    for file in provided:
+def validate_photo_files(files, required):
+    if required and len(files) < 5:
+        return "Upload at least 5 promotional photos."
+    for file in files:
         if not validate_file(file):
             return "Photos must be png, jpg, jpeg, gif or webp."
     return None
+
+
+def parse_photo_ids(values):
+    photo_ids = set()
+    for value in values:
+        try:
+            photo_id = int(value)
+        except (TypeError, ValueError):
+            raise ValueError("Invalid photo selection.")
+        if photo_id <= 0:
+            raise ValueError("Invalid photo selection.")
+        photo_ids.add(photo_id)
+    return photo_ids
+
+
+def reindex_tour_photos(conn, tour_id):
+    rows = conn.execute(
+        "SELECT id FROM tour_photos WHERE tour_id = ? ORDER BY position, id",
+        (tour_id,),
+    ).fetchall()
+    for position, row in enumerate(rows, start=1):
+        conn.execute(
+            "UPDATE tour_photos SET position = ? WHERE id = ?",
+            (position, row["id"]),
+        )
 
 
 def insert_tour_details(conn, tour_id, data, photo_files):
@@ -666,7 +721,7 @@ def create_tour():
         conn = get_db_connection()
         data, errors = parse_tour_form(conn)
         photo_files = get_form_photo_files()
-        photo_error = validate_five_photos(photo_files, required=True)
+        photo_error = validate_photo_files(photo_files, required=True)
         if photo_error:
             errors.append(photo_error)
 
@@ -724,23 +779,38 @@ def edit_tour(id):
     if tour["guide_id"] != int(current_user.id):
         conn.close()
         abort(403)
-    if tour_has_any_reservations(conn, id):
+    if tour_has_active_reservations(conn, id):
         conn.close()
-        flash("This tour already has reservations and cannot be edited.", "warning")
+        flash("This tour has active reservations and cannot be edited.", "warning")
         return redirect(url_for("tour_detail", id=id))
 
     selected_schedules = {row["weekday"]: row["start_time"] for row in get_schedules(conn, id)}
     stops = ", ".join(row["name"] for row in get_stops(conn, id))
+    current_photos = get_photos(conn, id)
     tour_data = dict(tour)
     tour_data["stops_text"] = stops
 
     if request.method == "POST":
         data, errors = parse_tour_form(conn, exclude_tour_id=id)
         photo_files = get_form_photo_files()
-        provided_files = [file for file in photo_files if file and file.filename]
-        photo_error = validate_five_photos(photo_files, required=False)
+        remove_photo_ids = set()
+        photo_error = validate_photo_files(photo_files, required=False)
         if photo_error:
             errors.append(photo_error)
+        try:
+            remove_photo_ids = parse_photo_ids(request.form.getlist("remove_photos"))
+            current_photo_ids = {photo["id"] for photo in current_photos}
+            if remove_photo_ids - current_photo_ids:
+                errors.append("Invalid photo selection.")
+        except ValueError as exc:
+            errors.append(str(exc))
+
+        final_photo_count = len(current_photos) - len(remove_photo_ids) + len(photo_files)
+        if (remove_photo_ids or photo_files) and final_photo_count < 5:
+            errors.append("A tour must keep at least 5 promotional photos.")
+        removed_photo_paths = [
+            photo["path"] for photo in current_photos if photo["id"] in remove_photo_ids
+        ]
 
         if errors:
             for error in errors:
@@ -750,6 +820,7 @@ def edit_tour(id):
                 "create_tour.html",
                 tour=tour_data,
                 selected_schedules=selected_schedules,
+                current_photos=current_photos,
             )
 
         try:
@@ -783,15 +854,29 @@ def edit_tour(id):
                     "INSERT INTO tour_stops (tour_id, name, position) VALUES (?, ?, ?)",
                     (id, stop, position),
                 )
-            if provided_files:
-                conn.execute("DELETE FROM tour_photos WHERE tour_id = ?", (id,))
-                for position, file in enumerate(photo_files, start=1):
+            for photo_id in remove_photo_ids:
+                conn.execute(
+                    "DELETE FROM tour_photos WHERE tour_id = ? AND id = ?",
+                    (id, photo_id),
+                )
+            if photo_files:
+                row = conn.execute(
+                    "SELECT COALESCE(MAX(position), 0) AS max_position FROM tour_photos WHERE tour_id = ?",
+                    (id,),
+                ).fetchone()
+                start_position = row["max_position"] + 1
+                for offset, file in enumerate(photo_files):
+                    position = start_position + offset
                     path = save_uploaded_file(file, f"tour-{id}-{position}")
                     conn.execute(
                         "INSERT INTO tour_photos (tour_id, path, position) VALUES (?, ?, ?)",
                         (id, path, position),
                     )
+            if remove_photo_ids or photo_files:
+                reindex_tour_photos(conn, id)
             conn.commit()
+            for path in removed_photo_paths:
+                delete_uploaded_file(path)
             flash("Tour updated.", "success")
             return redirect(url_for("tour_detail", id=id))
         except ValueError as exc:
@@ -806,6 +891,7 @@ def edit_tour(id):
         "create_tour.html",
         tour=tour_data,
         selected_schedules=selected_schedules,
+        current_photos=current_photos,
     )
 
 
@@ -902,7 +988,12 @@ def book_tour(id):
         expected_extra = num_people - 1
         if len(names) != expected_extra:
             raise ValueError(
-                f"Enter exactly {expected_extra} additional guest name(s) for this booking."
+                f"Enter exactly {expected_extra} guest full name(s) for this booking."
+            )
+        invalid_names = [name for name in names if not has_first_and_last_name(name)]
+        if invalid_names:
+            raise ValueError(
+                "Invalid guest name format: enter first name and last name for each guest."
             )
         seats_left = available_places(conn, tour, tour_date)
         if num_people > seats_left:
@@ -916,7 +1007,10 @@ def book_tour(id):
             tour["duration_mins"],
         )
         if overlap:
-            raise ValueError(f"You already have an overlapping booking: {overlap['title']}.")
+            raise ValueError(
+                f"You already have an overlapping booking: {overlap['title']} "
+                f"from {time_range_label(overlap['start_time'], overlap['duration_mins'])}."
+            )
 
         existing = conn.execute(
             """
