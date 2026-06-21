@@ -108,11 +108,11 @@ def init_db():
 
 ### Scelta progettuale
 
-La rimozione del seed rende il progetto piu pulito per la consegna: ogni dato presente nel database deriva da una vera azione del sito.
+La rimozione del seed rende il progetto piu pulito per il deploy e per il test controllato: ogni dato presente nel database deriva da una vera azione del sito.
 
 Alternativa valutata: mantenere utenti e tour di test.
 
-Motivo per cui non e stata scelta per il deploy: i dati pre-caricati sono comodi durante lo sviluppo, ma in consegna possono sembrare dati fittizi inseriti manualmente. Un database vuoto dimostra che il sito e capace di creare tutto tramite le proprie funzioni.
+Motivo per cui non e stata scelta come funzione automatica: i dati pre-caricati sono comodi durante lo sviluppo, ma non devono essere ricreati dal codice a ogni inizializzazione. Se servono dati di esempio per la consegna, possono essere creati usando normalmente il sito e poi salvati nel file `database.db`.
 
 ## Architettura Generale
 
@@ -534,6 +534,206 @@ UNIQUE (tour_id, tour_date)
 
 Ogni data puo avere un solo report.
 
+## Come Il Database Viene Usato Nel Codice
+
+Il database non e usato come semplice archivio di testo, ma come parte centrale delle regole applicative. Le tabelle in `schema.sql` rappresentano le entita del sito, mentre `app.py` contiene le funzioni che leggono, validano e modificano quei dati.
+
+### Connessione SQLite
+
+Ogni operazione parte da `get_db_connection()` in `db.py`:
+
+```python
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    return conn
+```
+
+`row_factory = sqlite3.Row` permette di leggere i risultati come dizionari:
+
+```python
+user_row["email"]
+tour["duration_mins"]
+```
+
+Questo rende il codice piu leggibile rispetto agli indici numerici, ad esempio `row[0]`.
+
+`PRAGMA foreign_keys = ON` abilita davvero i vincoli tra tabelle. In SQLite le foreign key devono essere attivate per connessione, quindi viene fatto ogni volta che si apre il database.
+
+### Query Parametrizzate
+
+Le query usano sempre parametri `?`, invece di costruire SQL concatenando stringhe.
+
+Esempio dal login:
+
+```python
+user_row = conn.execute(
+    "SELECT * FROM users WHERE email = ? AND role = ?",
+    (email, role),
+).fetchone()
+```
+
+Questa scelta evita problemi di SQL injection e mantiene separati comando SQL e dati inseriti dall'utente.
+
+Alternativa valutata: costruire la query con f-string.
+
+Motivo per cui non e stata scelta: i dati dei form non devono mai essere inseriti direttamente nella stringa SQL.
+
+### Vincoli Del Database E Controlli Python
+
+Molte regole sono controllate due volte:
+
+- in Python, per dare un messaggio chiaro all'utente;
+- nel database, per garantire l'integrita anche in casi limite.
+
+Esempio nella tabella `users`:
+
+```sql
+UNIQUE (email, role)
+```
+
+In `app.py`, se SQLite blocca un duplicato, Flask mostra un messaggio:
+
+```python
+except IntegrityError:
+    flash("An account with this email and role already exists.", "danger")
+```
+
+Esempio nella tabella `reservations`:
+
+```sql
+UNIQUE (user_id, tour_id, tour_date)
+```
+
+Il backend controlla prima se esiste gia una prenotazione, ma il vincolo SQL resta una protezione finale.
+
+### Creazione Tour E Tabelle Collegate
+
+Quando una guida crea un tour, il backend inserisce prima la riga principale in `tours` e poi usa l'id appena generato per inserire schedule, tappe e foto.
+
+Esempio semplificato:
+
+```python
+cursor = conn.execute("INSERT INTO tours (...) VALUES (...)", values)
+tour_id = cursor.lastrowid
+insert_tour_details(conn, tour_id, data, photo_files)
+conn.commit()
+```
+
+Questa struttura serve perche un tour ha molte informazioni ripetute:
+
+- piu giorni/orari in `tour_schedule`;
+- piu tappe in `tour_stops`;
+- piu foto in `tour_photos`.
+
+Alternativa valutata: salvare schedule, tappe e foto come testo unico dentro `tours`.
+
+Motivo per cui non e stata scelta: avrebbe reso difficili filtri, controlli su date, ordinamento delle tappe e gestione delle foto.
+
+### Transazioni E Rollback
+
+Le operazioni complesse vengono salvate solo alla fine con `conn.commit()`. Se durante il flusso qualcosa fallisce, viene eseguito `conn.rollback()`.
+
+Esempio nella creazione/modifica tour:
+
+```python
+try:
+    conn.execute(...)
+    insert_tour_details(conn, tour_id, data, photo_files)
+    conn.commit()
+except ValueError:
+    conn.rollback()
+```
+
+Questo evita stati parziali, ad esempio un tour creato senza foto o senza schedule.
+
+### Lettura Dei Tour
+
+La funzione `get_tour_row` unisce `tours` e `users` per ottenere sia il tour sia i dati della guida.
+
+```python
+SELECT tours.*, users.first_name AS guide_first_name,
+       users.last_name AS guide_last_name
+FROM tours
+JOIN users ON users.id = tours.guide_id
+WHERE tours.id = ?
+```
+
+Poi `enrich_tour` aggiunge dati calcolati:
+
+- schedule;
+- foto principale;
+- conteggio like;
+- conteggio commenti;
+- possibilita di modifica;
+- eventuali posti rimasti per una data.
+
+Questa separazione rende le query base semplici e lascia i dati derivati in funzioni Python leggibili.
+
+### Prenotazioni E Disponibilita
+
+La disponibilita viene calcolata sommando solo le prenotazioni attive per quella data.
+
+```python
+SELECT COALESCE(SUM(num_people), 0) AS total
+FROM reservations
+WHERE tour_id = ? AND tour_date = ? AND status = 'booked'
+```
+
+Poi il backend calcola:
+
+```python
+available = tour["max_participants"] - reserved_places
+```
+
+Questa scelta e fondamentale perche lo stesso tour puo ripetersi ogni settimana: i posti devono essere contati sulla singola uscita, non sul tour in generale.
+
+### Profili E Query Aggregate
+
+Nel profilo guida, le prenotazioni vengono raggruppate per data:
+
+```sql
+SELECT tour_date, COUNT(*) AS reservation_count,
+       COALESCE(SUM(num_people), 0) AS people_count
+FROM reservations
+WHERE tour_id = ? AND status = 'booked'
+GROUP BY tour_date
+```
+
+Questo permette alla guida di vedere non solo quante prenotazioni ha ricevuto, ma anche quante persone sono attese per ogni uscita reale.
+
+### Report Post-Tour
+
+Il report usa `tour_reports` con vincolo:
+
+```sql
+UNIQUE (tour_id, tour_date)
+```
+
+Prima di salvare, il backend controlla:
+
+- che la data appartenga allo schedule;
+- che il tour sia gia passato;
+- che ci siano prenotazioni;
+- che non esista gia un report;
+- che la foto sia valida;
+- che i partecipanti effettivi non superino gli attesi.
+
+In questo modo il database conserva un solo report finale per ogni uscita del tour.
+
+### Cancellazioni Logiche
+
+Quando un partecipante cancella una prenotazione, la riga non viene eliminata:
+
+```sql
+UPDATE reservations
+SET status = 'cancelled', cancelled_at = CURRENT_TIMESTAMP
+WHERE id = ?
+```
+
+Il vantaggio e che il sistema mantiene traccia della storia della prenotazione. Allo stesso tempo, tutte le query di disponibilita considerano solo `status = 'booked'`, quindi le prenotazioni cancellate non occupano posti.
+
 ## Funzioni Di Supporto
 
 ### Normalizzazione Email
@@ -806,8 +1006,11 @@ Motivo per cui non e stata scelta: nomi duplicati o caratteri strani potrebbero 
 
 Il footer contiene:
 
+- disclaimer sullo scopo didattico e non commerciale del sito;
+- nota sulle immagini tratte dal web e appartenenti ai rispettivi autori;
+- email di contatto per eventuale richiesta di rimozione;
 - attribuzione Icons8 per l'icona utente;
-- matricola e nome.
+- matricola e nome con link esterno.
 
 E sempre in fondo alla pagina grazie al layout flex sul `body`.
 
@@ -855,11 +1058,11 @@ Per il deploy:
 
 ### Scelta progettuale
 
-Il database parte vuoto.
+Il codice non contiene funzioni automatiche di popolamento: il database puo partire vuoto e ogni dato puo essere creato tramite le pagine del sito.
 
 Alternativa valutata: consegnare database gia popolato.
 
-Motivo per cui non e stata scelta: in deploy e consegna e preferibile dimostrare che il sito crea i propri dati tramite form reali.
+Motivo per cui non e stata scelta come funzione automatica: in deploy e preferibile evitare codice che crea account, password, tour o prenotazioni a ogni inizializzazione. Se per la consegna serve rispettare il requisito dei dati di esempio, e meglio creare quei dati usando il sito e consegnare il `database.db` risultante insieme a un file con le credenziali, senza reintrodurre una funzione di seed nel codice.
 
 ## Sequenza Consigliata Per Provare Il Sito Vuoto
 
