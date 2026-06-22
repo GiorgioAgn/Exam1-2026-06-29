@@ -1,13 +1,13 @@
 # Free Walking Tour Siracusa
 
-Web application per la simulazione d'esame di Introduction to Web Applications.
+Web application per l'esame di Introduction to Web Applications.
 Il progetto usa Flask, Flask-Login, SQLite, HTML5, CSS3 e Bootstrap.
 
 ## Tema
 
 La piattaforma gestisce Free Walking Tours nella citta di Siracusa. Le guide
-pubblicano itinerari con schedule settimanale, lingua, tappe, descrizione e almeno
-5 foto promozionali. I partecipanti possono consultare i tour anche senza login,
+pubblicano itinerari con schedule settimanale, lingua, almeno 4 tappe, descrizione
+e almeno 5 foto promozionali. I partecipanti possono consultare i tour anche senza login,
 ma devono autenticarsi come partecipanti per prenotare una data.
 
 L'interfaccia del sito e in inglese statico. Titoli, descrizioni e contenuti
@@ -48,7 +48,7 @@ Installare le dipendenze:
 pip install -r requirements.txt
 ```
 
-Inizializzare il database vuoto:
+Inizializzare il database:
 
 ```bash
 python db.py
@@ -69,7 +69,7 @@ http://127.0.0.1:5000
 ## Flussi consigliati per il test
 
 1. Registrare un account guida e selezionare almeno una lingua parlata.
-2. Accedere come guida e pianificare un tour con schedule, tappe e almeno 5 foto.
+2. Accedere come guida e pianificare un tour con schedule, almeno 4 tappe e almeno 5 foto.
 3. Visitare homepage e pagina Tours senza login per verificare la consultazione pubblica.
 4. Provare a prenotare senza login: il sito propone login o registrazione.
 5. Registrare un account partecipante.
@@ -84,13 +84,12 @@ http://127.0.0.1:5000
 app.py                 Rotte Flask, validazioni e regole applicative
 db.py                  Connessione SQLite e inizializzazione database vuoto
 schema.sql             Schema relazionale
-database.db            Database SQLite consegnabile
+database.db            Database SQLite
 templates/             Template Jinja
 static/assets/css/     Stili CSS custom
 static/assets/img/     Immagini statiche
 static/uploads/        Upload di tour e report
 requirements.txt       Dipendenze Python
-GUIDA_PROGETTO.md      Guida completa a funzioni, architettura e scelte progettuali
 ```
 
 ## Deployment
@@ -98,5 +97,5 @@ GUIDA_PROGETTO.md      Guida completa a funzioni, architettura e scelte progettu
 URL PythonAnywhere:
 
 ```text
-Da compilare dopo il deploy
+TODO
 ```

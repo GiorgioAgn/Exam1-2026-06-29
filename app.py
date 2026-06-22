@@ -36,6 +36,7 @@ DURATION_FILTERS = {
     "medium": ("91-150 min", 91, 150),
     "long": ("Over 150 min", 151, 10000),
 }
+MIN_TOUR_STOPS = 4
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -50,10 +51,6 @@ class User(UserMixin):
         self.first_name = first_name
         self.last_name = last_name
         self.languages = languages or ""
-
-    @property
-    def full_name(self):
-        return f"{self.first_name} {self.last_name}"
 
     @property
     def spoken_languages(self):
@@ -84,6 +81,7 @@ def inject_constants():
         "WEEKDAYS": WEEKDAYS,
         "WEEKDAY_NAMES": WEEKDAY_NAMES,
         "DURATION_FILTERS": DURATION_FILTERS,
+        "MIN_TOUR_STOPS": MIN_TOUR_STOPS,
     }
 
 
@@ -235,7 +233,7 @@ def primary_photo(conn, tour_id):
         "SELECT path FROM tour_photos WHERE tour_id = ? ORDER BY position LIMIT 1",
         (tour_id,),
     ).fetchone()
-    return photo["path"] if photo else "/static/assets/img/trail-forest.jpg"
+    return photo["path"] if photo else "/static/assets/img/favicon.png"
 
 
 def tour_like_count(conn, tour_id):
@@ -268,8 +266,7 @@ def get_tour_row(conn, tour_id):
     return conn.execute(
         """
         SELECT tours.*, users.first_name AS guide_first_name,
-               users.last_name AS guide_last_name, users.email AS guide_email,
-               users.languages AS guide_languages
+               users.last_name AS guide_last_name
         FROM tours
         JOIN users ON users.id = tours.guide_id
         WHERE tours.id = ?
@@ -386,7 +383,6 @@ def enrich_tour(conn, row, selected_date=None):
     tour["is_liked"] = current_user_liked(conn, tour["id"])
     if selected_date:
         schedule = get_schedule_for_date(conn, tour["id"], selected_date)
-        tour["selected_start_time"] = schedule["start_time"] if schedule else None
         tour["selected_seats_left"] = available_places(conn, tour, selected_date) if schedule else None
     return tour
 
@@ -464,8 +460,8 @@ def parse_tour_form(conn, exclude_tour_id=None):
         errors.append("The description must contain at least 30 characters.")
     if language not in current_user.spoken_languages:
         errors.append("The tour language must be one of the guide's spoken languages.")
-    if not stops:
-        errors.append("Enter at least one stop.")
+    if len(stops) < MIN_TOUR_STOPS:
+        errors.append(f"Enter at least {MIN_TOUR_STOPS} stops.")
 
     try:
         duration_mins = parse_positive_int(request.form.get("duration_mins"), "Duration", 30, 360)

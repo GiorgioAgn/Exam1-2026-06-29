@@ -479,7 +479,7 @@ Le tappe e le foto sono separate dal tour.
 
 Motivo:
 
-- un tour ha piu tappe;
+- un tour ha almeno quattro tappe;
 - un tour ha almeno cinque foto;
 - ogni elemento ha una posizione.
 
@@ -808,13 +808,13 @@ Motivo per cui non e stata scelta: un redirect libero potrebbe portare fuori dal
 ## Flusso Creazione Tour
 
 1. La guida apre `/create-tour`.
-2. Il form richiede titolo, tema, meeting point, lingua, durata, capienza, schedule, tappe, descrizione e almeno cinque foto.
+2. Il form richiede titolo, tema, meeting point, lingua, durata, capienza, schedule, almeno quattro tappe, descrizione e almeno cinque foto.
 3. Il backend controlla:
    - ruolo guida;
    - lingua tra quelle parlate dalla guida;
    - durata tra 30 e 360 minuti;
    - capienza tra 1 e 40;
-   - almeno una tappa;
+   - almeno quattro tappe;
    - almeno un giorno/orario;
    - almeno cinque foto promozionali;
    - nessuna sovrapposizione nell'agenda guida.
@@ -1068,7 +1068,7 @@ Motivo per cui non e stata scelta come funzione automatica: in deploy e preferib
 
 1. Registrare una guida.
 2. Accedere come guida.
-3. Pianificare un tour con almeno cinque foto.
+3. Pianificare un tour con almeno quattro tappe e almeno cinque foto.
 4. Aprire homepage e Tours senza login.
 5. Registrare un partecipante.
 6. Aprire il dettaglio tour.

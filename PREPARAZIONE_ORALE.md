@@ -85,7 +85,7 @@ Scelta del progetto: la stessa email puo essere usata per creare un profilo guid
 - Ogni tour deve avere una lingua.
 - La lingua del tour deve essere una delle lingue parlate dalla guida.
 - Ogni tour deve avere un numero massimo di partecipanti.
-- Ogni tour deve avere una lista di tappe.
+- Ogni tour deve avere una lista di almeno 4 tappe.
 - Ogni tour deve avere una breve descrizione.
 - Ogni tour deve avere 5 foto promozionali.
 - I temi dei tour sono liberi.
@@ -189,63 +189,64 @@ Vincolo logico aggiunto: un partecipante non puo avere due prenotazioni sovrappo
 | T09 | Login | Credenziali corrette | Login con email, password e ruolo corretti | Sessione aperta e menu profilo visibile |
 | T10 | Logout | Uscita sessione | Cliccare Log out | Utente riportato alla homepage come visitatore |
 | T11 | Accesso guide | Route protetta | Da participant aprire `/create-tour` | Accesso negato o redirect con messaggio |
-| T12 | Creazione tour | Form valido | Da guida creare tour con campi, schedule, tappe e 5 foto | Tour creato e dettaglio aperto |
+| T12 | Creazione tour | Form valido | Da guida creare tour con campi, schedule, almeno 4 tappe e 5 foto | Tour creato e dettaglio aperto |
 | T13 | Creazione tour | Lingua non parlata | Forzare lingua diversa da quelle della guida | Backend blocca il salvataggio |
 | T14 | Creazione tour | Meno di 5 foto | Provare a creare tour con 4 foto | Errore: servono almeno 5 foto |
-| T15 | Creazione tour | Durata non valida | Inserire durata sotto 30 o sopra 360 | Form/backend bloccano il valore |
-| T16 | Creazione tour | Capienza non valida | Inserire capienza sotto 1 o sopra 40 | Form/backend bloccano il valore |
-| T17 | Creazione tour | Nessuno schedule | Non selezionare alcun giorno | Errore: selezionare almeno un giorno |
-| T18 | Agenda guida | Overlap | Creare due tour della stessa guida sovrapposti nello stesso weekday | Errore con titolo e slot del tour gia esistente |
-| T19 | Agenda guida | Nessun overlap | Creare due tour stesso giorno ma orari separati | Secondo tour accettato |
-| T20 | Consultazione pubblica | Homepage | Aprire homepage senza login | Tour in evidenza visibili |
-| T21 | Consultazione pubblica | Pagina Tours | Aprire `/tours` senza login | Tutti i tour pubblici sono consultabili |
-| T22 | Filtri | Data | Selezionare una data in Tours | Restano tour previsti in quella data |
-| T23 | Filtri | Durata | Applicare filtro durata | Restano tour nella fascia scelta |
-| T24 | Filtri | Lingua | Applicare filtro lingua | Restano tour nella lingua scelta |
-| T25 | Filtri | Ricerca | Cercare parola contenuta in titolo o tema | Restano i tour pertinenti |
-| T26 | Dettaglio tour | Informazioni obbligatorie | Aprire un tour | Sono visibili titolo, guida, schedule, meeting point, durata, lingua, capienza, tappe, descrizione e foto |
-| T27 | Foto | Galleria modale | Cliccare una foto del tour | Si apre la finestra con carousel e frecce |
-| T28 | Like | Utente non loggato | Cliccare like da visitatore | Redirect al login |
-| T29 | Like | Toggle | Da utente loggato cliccare like due volte | Prima aggiunge, poi rimuove il like |
-| T30 | Commenti | Utente non loggato | Provare a commentare senza login | Viene richiesto il login |
-| T31 | Commenti | Testo valido | Commentare da utente loggato | Commento pubblicato con badge ruolo |
-| T32 | Commenti | Autore tour | Commentare come guida proprietaria | Compare badge `Tour author` |
-| T33 | Prenotazione | Visitatore | Da visitatore premere prenotazione | Redirect a login/register |
-| T34 | Prenotazione | Guida | Provare a prenotare con account guida | Operazione bloccata |
-| T35 | Prenotazione | Participant valido | Prenotare una data disponibile per 1 persona | Booking confermato |
-| T36 | Prenotazione | Accompagnatori validi | Prenotare per 3 persone con 2 full names | Booking confermato |
-| T37 | Prenotazione | Numero accompagnatori errato | Prenotare per 3 persone con 1 solo nome | Errore sul numero di guest full names |
-| T38 | Prenotazione | Formato accompagnatori errato | Inserire solo nome senza cognome | Errore formato: servono first name e last name |
-| T39 | Prenotazione | Capienza superata | Prenotare piu posti di quelli rimasti | Errore con posti disponibili |
-| T40 | Prenotazione | Data non prevista | Forzare una data non nello schedule | Backend blocca la prenotazione |
-| T41 | Prenotazione | Data passata | Forzare una data passata | Backend blocca la prenotazione |
-| T42 | Prenotazione | Duplicato stessa data | Prenotare due volte stesso tour e stessa data | Seconda prenotazione bloccata |
-| T43 | Agenda participant | Overlap | Prenotare due tour sovrapposti nella stessa data | Seconda prenotazione bloccata |
-| T44 | Profilo participant | Riepilogo | Aprire profilo participant | Visualizza date, orari, meeting point, persone, accompagnatori e stato |
-| T45 | Profilo participant | Link titolo | Cliccare titolo tour nel profilo | Si apre il dettaglio del tour |
-| T46 | Cancellazione | Oltre 24 ore | Cancellare prenotazione futura con almeno 24 ore | Stato diventa `Cancelled` |
-| T47 | Cancellazione | Meno di 24 ore | Provare cancellazione vicino all'inizio | Operazione bloccata |
-| T48 | Cancellazione | Posti liberati | Cancellare una prenotazione e controllare posti | I posti tornano disponibili |
-| T49 | Modifica tour | Nessuna prenotazione attiva | Modificare tour senza booking attivi | Modifica consentita |
-| T50 | Modifica tour | Prenotazione attiva | Provare a modificare tour con booking attivo | Modifica bloccata |
-| T51 | Modifica tour | Prenotazione cancellata | Cancellare tutti i booking attivi e riprovare edit | Modifica torna disponibile |
-| T52 | Modifica foto | Rimozione non valida | Rimuovere troppe foto senza sostituirle | Backend blocca se restano meno di 5 |
-| T53 | Modifica foto | Rimozione piu aggiunta | Rimuovere una foto e aggiungerne una nuova | Salvataggio accettato, foto riordinate |
-| T54 | Profilo guida | Riepilogo tour | Aprire profilo guida | Vede i propri tour e lo stato edit |
-| T55 | Profilo guida | Prenotazioni per data | Aprire un tour con booking | Vede gruppi per data e partecipanti attesi |
-| T56 | Report | Tour futuro | Provare report prima della data | Report bloccato |
-| T57 | Report | Nessuna prenotazione | Provare report su data senza booking | Report bloccato |
-| T58 | Report | Report valido | Dopo una data passata con booking, inserire presenti e foto | Report salvato |
-| T59 | Report | Doppio report | Reinviare report per stessa data | Operazione bloccata |
-| T60 | Report | Presenti oltre attesi | Inserire actual participants maggiore degli attesi | Backend blocca il valore |
-| T61 | Upload | Estensione non valida | Caricare file non immagine | Operazione bloccata |
-| T62 | Sicurezza route | Proprietario tour | Guida A prova a editare tour di guida B | Errore 403 |
-| T63 | Sicurezza redirect | Next interno | Accedere dopo redirect da pagina protetta | Ritorno alla pagina richiesta |
-| T64 | UI responsive | Mobile navbar | Aprire sito da viewport mobile | Menu mobile e ricerca centrata funzionano |
-| T65 | UI responsive | Booking mobile | Aprire dettaglio tour da mobile | Agenda e form non si sovrappongono |
-| T66 | HTML | Validazione output | Validare HTML renderizzato, non template Jinja grezzi | Il validator non segnala errori dovuti a Jinja |
-| T67 | Deploy | PythonAnywhere | Avviare app in deploy con database e cartella upload | Sito navigabile e upload funzionanti |
-| T68 | Documentazione | Istruzioni | Aprire README e guida | Avvio, struttura e flussi sono comprensibili |
+| T15 | Creazione tour | Meno di 4 tappe | Inserire solo 3 tappe | Errore: servono almeno 4 tappe |
+| T16 | Creazione tour | Durata non valida | Inserire durata sotto 30 o sopra 360 | Form/backend bloccano il valore |
+| T17 | Creazione tour | Capienza non valida | Inserire capienza sotto 1 o sopra 40 | Form/backend bloccano il valore |
+| T18 | Creazione tour | Nessuno schedule | Non selezionare alcun giorno | Errore: selezionare almeno un giorno |
+| T19 | Agenda guida | Overlap | Creare due tour della stessa guida sovrapposti nello stesso weekday | Errore con titolo e slot del tour gia esistente |
+| T20 | Agenda guida | Nessun overlap | Creare due tour stesso giorno ma orari separati | Secondo tour accettato |
+| T21 | Consultazione pubblica | Homepage | Aprire homepage senza login | Tour in evidenza visibili |
+| T22 | Consultazione pubblica | Pagina Tours | Aprire `/tours` senza login | Tutti i tour pubblici sono consultabili |
+| T23 | Filtri | Data | Selezionare una data in Tours | Restano tour previsti in quella data |
+| T24 | Filtri | Durata | Applicare filtro durata | Restano tour nella fascia scelta |
+| T25 | Filtri | Lingua | Applicare filtro lingua | Restano tour nella lingua scelta |
+| T26 | Filtri | Ricerca | Cercare parola contenuta in titolo o tema | Restano i tour pertinenti |
+| T27 | Dettaglio tour | Informazioni obbligatorie | Aprire un tour | Sono visibili titolo, guida, schedule, meeting point, durata, lingua, capienza, tappe, descrizione e foto |
+| T28 | Foto | Galleria modale | Cliccare una foto del tour | Si apre la finestra con carousel e frecce |
+| T29 | Like | Utente non loggato | Cliccare like da visitatore | Redirect al login |
+| T30 | Like | Toggle | Da utente loggato cliccare like due volte | Prima aggiunge, poi rimuove il like |
+| T31 | Commenti | Utente non loggato | Provare a commentare senza login | Viene richiesto il login |
+| T32 | Commenti | Testo valido | Commentare da utente loggato | Commento pubblicato con badge ruolo |
+| T33 | Commenti | Autore tour | Commentare come guida proprietaria | Compare badge `Tour author` |
+| T34 | Prenotazione | Visitatore | Da visitatore premere prenotazione | Redirect a login/register |
+| T35 | Prenotazione | Guida | Provare a prenotare con account guida | Operazione bloccata |
+| T36 | Prenotazione | Participant valido | Prenotare una data disponibile per 1 persona | Booking confermato |
+| T37 | Prenotazione | Accompagnatori validi | Prenotare per 3 persone con 2 full names | Booking confermato |
+| T38 | Prenotazione | Numero accompagnatori errato | Prenotare per 3 persone con 1 solo nome | Errore sul numero di guest full names |
+| T39 | Prenotazione | Formato accompagnatori errato | Inserire solo nome senza cognome | Errore formato: servono first name e last name |
+| T40 | Prenotazione | Capienza superata | Prenotare piu posti di quelli rimasti | Errore con posti disponibili |
+| T41 | Prenotazione | Data non prevista | Forzare una data non nello schedule | Backend blocca la prenotazione |
+| T42 | Prenotazione | Data passata | Forzare una data passata | Backend blocca la prenotazione |
+| T43 | Prenotazione | Duplicato stessa data | Prenotare due volte stesso tour e stessa data | Seconda prenotazione bloccata |
+| T44 | Agenda participant | Overlap | Prenotare due tour sovrapposti nella stessa data | Seconda prenotazione bloccata |
+| T45 | Profilo participant | Riepilogo | Aprire profilo participant | Visualizza date, orari, meeting point, persone, accompagnatori e stato |
+| T46 | Profilo participant | Link titolo | Cliccare titolo tour nel profilo | Si apre il dettaglio del tour |
+| T47 | Cancellazione | Oltre 24 ore | Cancellare prenotazione futura con almeno 24 ore | Stato diventa `Cancelled` |
+| T48 | Cancellazione | Meno di 24 ore | Provare cancellazione vicino all'inizio | Operazione bloccata |
+| T49 | Cancellazione | Posti liberati | Cancellare una prenotazione e controllare posti | I posti tornano disponibili |
+| T50 | Modifica tour | Nessuna prenotazione attiva | Modificare tour senza booking attivi | Modifica consentita |
+| T51 | Modifica tour | Prenotazione attiva | Provare a modificare tour con booking attivo | Modifica bloccata |
+| T52 | Modifica tour | Prenotazione cancellata | Cancellare tutti i booking attivi e riprovare edit | Modifica torna disponibile |
+| T53 | Modifica foto | Rimozione non valida | Rimuovere troppe foto senza sostituirle | Backend blocca se restano meno di 5 |
+| T54 | Modifica foto | Rimozione piu aggiunta | Rimuovere una foto e aggiungerne una nuova | Salvataggio accettato, foto riordinate |
+| T55 | Profilo guida | Riepilogo tour | Aprire profilo guida | Vede i propri tour e lo stato edit |
+| T56 | Profilo guida | Prenotazioni per data | Aprire un tour con booking | Vede gruppi per data e partecipanti attesi |
+| T57 | Report | Tour futuro | Provare report prima della data | Report bloccato |
+| T58 | Report | Nessuna prenotazione | Provare report su data senza booking | Report bloccato |
+| T59 | Report | Report valido | Dopo una data passata con booking, inserire presenti e foto | Report salvato |
+| T60 | Report | Doppio report | Reinviare report per stessa data | Operazione bloccata |
+| T61 | Report | Presenti oltre attesi | Inserire actual participants maggiore degli attesi | Backend blocca il valore |
+| T62 | Upload | Estensione non valida | Caricare file non immagine | Operazione bloccata |
+| T63 | Sicurezza route | Proprietario tour | Guida A prova a editare tour di guida B | Errore 403 |
+| T64 | Sicurezza redirect | Next interno | Accedere dopo redirect da pagina protetta | Ritorno alla pagina richiesta |
+| T65 | UI responsive | Mobile navbar | Aprire sito da viewport mobile | Menu mobile e ricerca centrata funzionano |
+| T66 | UI responsive | Booking mobile | Aprire dettaglio tour da mobile | Agenda e form non si sovrappongono |
+| T67 | HTML | Validazione output | Validare HTML renderizzato, non template Jinja grezzi | Il validator non segnala errori dovuti a Jinja |
+| T68 | Deploy | PythonAnywhere | Avviare app in deploy con database e cartella upload | Sito navigabile e upload funzionanti |
+| T69 | Documentazione | Istruzioni | Aprire README e guida | Avvio, struttura e flussi sono comprensibili |
 
 ## 3. Punti Da Saper Spiegare All'Orale
 

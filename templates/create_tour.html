@@ -9,7 +9,7 @@
         <p class="section-label mb-2">Guide dashboard</p>
         <h1 class="homepage-title mb-3">{% if tour %}Edit Tour{% else %}Plan a Tour{% endif %}</h1>
         <p class="homepage-text mx-auto text-muted">
-          Each tour must include a weekly schedule, language, stops, description and at least five promotional photos.
+          Each tour must include a weekly schedule, language, at least four stops, description and at least five promotional photos.
         </p>
       </header>
 
@@ -71,7 +71,8 @@
 
           <div class="mb-3">
             <label class="form-label small fw-bold" for="stops">Stops</label>
-            <textarea id="stops" name="stops" class="form-control rounded-4 bg-light border-0 p-3" rows="3" required placeholder="One stop per line or separated by commas">{{ tour.stops_text if tour else '' }}</textarea>
+            <textarea id="stops" name="stops" class="form-control rounded-4 bg-light border-0 p-3" rows="3" required data-min-stops="{{ MIN_TOUR_STOPS }}" placeholder="One stop per line or separated by commas">{{ tour.stops_text if tour else '' }}</textarea>
+            <p class="small text-muted mt-2 mb-0">Enter at least {{ MIN_TOUR_STOPS }} stops.</p>
           </div>
 
           <div class="mb-4">
@@ -140,6 +141,32 @@
 
   scheduleChecks.forEach((checkbox) => checkbox.addEventListener('change', syncScheduleRequirements));
   syncScheduleRequirements();
+
+  const stopsInput = document.getElementById('stops');
+
+  function parseStops(value) {
+    return (value || '')
+      .replace(/\n/g, ',')
+      .split(',')
+      .map((stop) => stop.trim())
+      .filter(Boolean);
+  }
+
+  function syncStopsValidation() {
+    if (!stopsInput) {
+      return;
+    }
+    const minStops = Number(stopsInput.dataset.minStops || 4);
+    const stops = parseStops(stopsInput.value);
+    stopsInput.setCustomValidity(
+      stops.length < minStops ? `Enter at least ${minStops} stops.` : ''
+    );
+  }
+
+  if (stopsInput) {
+    stopsInput.addEventListener('input', syncStopsValidation);
+    syncStopsValidation();
+  }
 
   const photoInput = document.getElementById('photos');
   const photoSelection = document.getElementById('photoSelection');
