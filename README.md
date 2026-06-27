@@ -60,11 +60,6 @@ Avviare l'app:
 python app.py
 ```
 
-Poi aprire:
-
-```text
-http://127.0.0.1:5000
-```
 
 ## Flussi consigliati per il test
 
@@ -97,5 +92,5 @@ requirements.txt       Dipendenze Python
 URL PythonAnywhere:
 
 ```text
-TODO
+https://giorgioagn.pythonanywhere.com/
 ```
