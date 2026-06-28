@@ -167,7 +167,7 @@
             </div>
           {% elif current_user.role != 'participant' %}
             <div class="alert alert-light border rounded-4 text-center">
-              Guides cannot book with a guide account. You can create a separate participant profile with the same email.
+              Guides cannot book with a guide account.
             </div>
           {% elif upcoming_dates %}
             <form action="{{ url_for('book_tour', id=tour.id) }}" method="POST">
@@ -223,7 +223,7 @@
   </article>
 
   {% if photos %}
-    <div class="modal fade photo-modal" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal fade photo-modal" id="photoModal" tabindex="-1" role="dialog" aria-labelledby="photoModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content border-0 rounded-4 overflow-hidden">
           <div class="modal-header border-0">
@@ -264,6 +264,8 @@
 
 {% block scripts %}
 <script>
+  // Gallery
+
   const photoCarouselEl = document.getElementById('photoCarousel');
   if (photoCarouselEl) {
     const photoCarousel = bootstrap.Carousel.getOrCreateInstance(photoCarouselEl, {
@@ -278,6 +280,8 @@
       });
     });
   }
+
+  // Booking
 
   const agendaInputs = document.querySelectorAll('input[name="tour_date"]');
   const peopleInput = document.getElementById('numPeople');

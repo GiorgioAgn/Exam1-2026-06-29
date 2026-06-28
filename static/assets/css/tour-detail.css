@@ -62,7 +62,7 @@
 .tour-hero-overlay h2 {
 	margin: 0;
 	font-weight: 800;
-	letter-spacing: -0.06rem;
+	letter-spacing: 0;
 }
 
 .tour-hero-overlay .section-label {
@@ -269,7 +269,7 @@
 .comments h3 {
 	color: var(--brand-green-dark);
 	font-weight: 800;
-	letter-spacing: -0.04rem;
+	letter-spacing: 0;
 }
 
 .tour-content p,

@@ -11,6 +11,8 @@ from werkzeug.utils import secure_filename
 from db import get_db_connection
 
 
+# Configuration
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
@@ -42,6 +44,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
 
+
+# Authentication
 
 class User(UserMixin):
     def __init__(self, id, email, role, first_name, last_name, languages=""):
@@ -84,6 +88,8 @@ def inject_constants():
         "MIN_TOUR_STOPS": MIN_TOUR_STOPS,
     }
 
+
+# Validation
 
 def normalize_email(email):
     return (email or "").strip().lower()
@@ -193,6 +199,8 @@ def require_role(role):
     return None
 
 
+# Tour data
+
 def get_schedules(conn, tour_id):
     return conn.execute(
         "SELECT * FROM tour_schedule WHERE tour_id = ? ORDER BY weekday",
@@ -274,6 +282,8 @@ def get_tour_row(conn, tour_id):
         (tour_id,),
     ).fetchone()
 
+
+# Availability
 
 def active_reserved_places(conn, tour_id, tour_date):
     row = conn.execute(
@@ -420,6 +430,8 @@ def filtered_tours(conn, filters):
         results.append(tour)
     return results
 
+
+# Tour forms
 
 def parse_schedule_form():
     schedules = []
@@ -570,6 +582,8 @@ def insert_tour_details(conn, tour_id, data, photo_files):
         )
 
 
+# Public pages
+
 @app.route("/")
 def index():
     conn = get_db_connection()
@@ -605,6 +619,8 @@ def tours():
     conn.close()
     return render_template("tours.html", tours=tour_list, filters=filters)
 
+
+# Account routes
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -693,7 +709,7 @@ def register():
             flash("Registration completed. You can now sign in.", "success")
             return redirect(url_for("login"))
         except IntegrityError:
-            flash("An account with this email and role already exists.", "danger")
+            flash("An account with this email already exists.", "danger")
         finally:
             conn.close()
     return render_template("register.html")
@@ -705,6 +721,8 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+
+# Guide tours
 
 @app.route("/create-tour", methods=["GET", "POST"])
 @login_required
@@ -891,6 +909,8 @@ def edit_tour(id):
     )
 
 
+# Tour actions
+
 @app.route("/tour/<int:id>")
 def tour_detail(id):
     conn = get_db_connection()
@@ -1074,6 +1094,8 @@ def add_comment(id):
     return redirect(url_for("tour_detail", id=id))
 
 
+# Profiles
+
 @app.route("/profile")
 @login_required
 def profile():
@@ -1232,6 +1254,8 @@ def guide_profile():
     conn.close()
     return render_template("guide_profile.html", tours=tours)
 
+
+# Reports
 
 @app.route("/guide/report/<int:tour_id>/<tour_date>", methods=["POST"])
 @login_required

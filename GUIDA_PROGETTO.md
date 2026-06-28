@@ -15,7 +15,7 @@ L'obiettivo non era creare una vetrina statica, ma un'applicazione completa:
 - prenotazioni reali con capienza e agenda;
 - controlli su sovrapposizioni, date, posti e permessi.
 
-Il sito parte vuoto: non ci sono account, tour, like, commenti o prenotazioni pre-caricati. I dati vengono creati solo tramite le azioni degli utenti.
+Il codice non crea dati automaticamente. Il file `database.db` della consegna contiene dati campione creati attraverso le normali funzioni del sito, come richiesto dal testo d'esame.
 
 ## Tecnologie Usate
 
@@ -43,7 +43,7 @@ Motivo per cui non e stata scelta: avrebbe richiesto una separazione piu comples
 app.py                 Backend Flask: rotte, validazioni, regole applicative
 db.py                  Connessione SQLite e inizializzazione database vuoto
 schema.sql             Schema relazionale del database
-database.db            Database SQLite vuoto, pronto per essere popolato dagli utenti
+database.db            Database SQLite con dati campione
 requirements.txt       Dipendenze Python
 templates/             Template Jinja
 static/assets/css/     CSS custom
@@ -69,33 +69,27 @@ Motivo per cui non e stata scelta: i blueprint sarebbero utili in un progetto pi
 pip install -r requirements.txt
 ```
 
-2. Inizializzare il database vuoto:
-
-```bash
-python db.py
-```
-
-3. Avviare Flask:
+2. Avviare Flask usando il database campione incluso:
 
 ```bash
 python app.py
 ```
 
-4. Aprire il sito:
+3. Aprire il sito:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-## Database Vuoto
+## Inizializzazione Database
 
-Il file `db.py` non contiene piu funzioni di seed. Questo e importante per il deploy: il sito non deve partire con account o contenuti gia presenti.
+Il file `db.py` non contiene funzioni di seed. I dati campione presenti in `database.db` sono stati creati tramite registrazione, pianificazione e prenotazione dal sito, non da codice automatico.
 
 `db.py` fa solo tre cose:
 
 1. apre una connessione SQLite;
 2. abilita le foreign keys con `PRAGMA foreign_keys = ON`;
-3. esegue `schema.sql` per creare tabelle vuote.
+3. esegue `schema.sql` per ricreare tabelle vuote.
 
 ```python
 def init_db():
@@ -108,11 +102,13 @@ def init_db():
 
 ### Scelta progettuale
 
-La rimozione del seed rende il progetto piu pulito per il deploy e per il test controllato: ogni dato presente nel database deriva da una vera azione del sito.
+L'assenza del seed mantiene separati schema e contenuti: ogni dato campione deriva da una vera azione del sito.
 
 Alternativa valutata: mantenere utenti e tour di test.
 
-Motivo per cui non e stata scelta come funzione automatica: i dati pre-caricati sono comodi durante lo sviluppo, ma non devono essere ricreati dal codice a ogni inizializzazione. Se servono dati di esempio per la consegna, possono essere creati usando normalmente il sito e poi salvati nel file `database.db`.
+Motivo per cui non e stata scelta come funzione automatica: gli account e i tour non devono essere ricreati dal codice a ogni inizializzazione. Per la consegna sono stati creati usando il sito e salvati nel file `database.db`.
+
+Eseguire `python db.py` elimina i dati campione e ricrea un database vuoto. Questa operazione e utile solo per un reset volontario e non serve per il normale avvio della consegna.
 
 ## Architettura Generale
 
@@ -264,7 +260,7 @@ Il ruolo e scelto esplicitamente sia in registrazione sia in login.
 
 Alternativa valutata: un solo account con campo ruolo multiplo.
 
-Motivo per cui non e stata scelta: il requisito voleva permettere alla stessa email di essere sia guida sia partecipante. Con `UNIQUE(email, role)` e possibile avere due profili separati con la stessa email, uno per ruolo.
+Motivo per cui non e stata scelta: il testo richiede ruoli distinti e un'email univoca. Ogni account ha quindi un solo ruolo e una sola email identificativa.
 
 ### Profilo Partecipante
 
@@ -425,18 +421,18 @@ Contiene:
 Vincolo importante:
 
 ```sql
-UNIQUE (email, role)
+UNIQUE (email)
 ```
 
-Questo permette alla stessa email di essere registrata una volta come guida e una volta come partecipante, ma blocca duplicati nello stesso ruolo.
+Questo impedisce che la stessa email venga usata da piu account, anche con ruoli differenti.
 
 ### Scelta progettuale
 
-L'email non e unica da sola, ma unica insieme al ruolo.
+L'email e unica in tutta la tabella `users`.
 
-Alternativa valutata: `UNIQUE(email)`.
+Alternativa valutata: `UNIQUE(email, role)`.
 
-Motivo per cui non e stata scelta: avrebbe impedito a una guida di registrarsi anche come partecipante.
+Motivo per cui non e stata scelta: avrebbe consentito di usare la stessa email per due account, in contrasto con il requisito di unicita.
 
 ### Tabella `tours`
 
@@ -590,14 +586,14 @@ Molte regole sono controllate due volte:
 Esempio nella tabella `users`:
 
 ```sql
-UNIQUE (email, role)
+UNIQUE (email)
 ```
 
 In `app.py`, se SQLite blocca un duplicato, Flask mostra un messaggio:
 
 ```python
 except IntegrityError:
-    flash("An account with this email and role already exists.", "danger")
+    flash("An account with this email already exists.", "danger")
 ```
 
 Esempio nella tabella `reservations`:
@@ -779,11 +775,11 @@ Motivo per cui non e stata scelta: le stringhe sono meno sicure per calcolare in
 4. Flask valida campi, email, password e ruolo.
 5. La password viene hashata.
 6. L'utente viene inserito in `users`.
-7. Se email+ruolo esiste gia, SQLite genera `IntegrityError`.
+7. Se l'email esiste gia, SQLite genera `IntegrityError`.
 
 ### Scelta progettuale
 
-La duplicazione email viene delegata anche al database con `UNIQUE(email, role)`.
+La duplicazione email viene impedita dal database con `UNIQUE(email)`.
 
 Alternativa valutata: controllare duplicati solo con una query prima dell'insert.
 
@@ -1051,20 +1047,19 @@ Motivo per cui non e stata scelta: il sito richiede login, ruoli, dati dinamici,
 Per il deploy:
 
 1. caricare progetto e dipendenze;
-2. creare o caricare `database.db`;
-3. se serve inizializzare il database, eseguire `python db.py`;
-4. configurare la variabile `SECRET_KEY`;
-5. assicurarsi che la cartella `static/uploads` sia scrivibile.
+2. caricare il `database.db` con i dati campione;
+3. configurare la variabile `SECRET_KEY`;
+4. assicurarsi che la cartella `static/uploads` sia scrivibile.
 
 ### Scelta progettuale
 
-Il codice non contiene funzioni automatiche di popolamento: il database puo partire vuoto e ogni dato puo essere creato tramite le pagine del sito.
+Il codice non contiene funzioni automatiche di popolamento. Il database della consegna e stato invece popolato tramite le pagine del sito per rispettare i requisiti di test.
 
 Alternativa valutata: consegnare database gia popolato.
 
-Motivo per cui non e stata scelta come funzione automatica: in deploy e preferibile evitare codice che crea account, password, tour o prenotazioni a ogni inizializzazione. Se per la consegna serve rispettare il requisito dei dati di esempio, e meglio creare quei dati usando il sito e consegnare il `database.db` risultante insieme a un file con le credenziali, senza reintrodurre una funzione di seed nel codice.
+Motivo per cui non e stata scelta come funzione automatica: in deploy e preferibile evitare codice che crea account, password, tour o prenotazioni a ogni inizializzazione. I dati campione vengono consegnati direttamente nel file SQLite insieme alle credenziali documentate.
 
-## Sequenza Consigliata Per Provare Il Sito Vuoto
+## Sequenza Consigliata Per Provare Il Sito
 
 1. Registrare una guida.
 2. Accedere come guida.
@@ -1086,8 +1081,8 @@ Il progetto e stato costruito privilegiando leggibilita e coerenza:
 - database normalizzato ma non eccessivo;
 - controlli importanti lato backend;
 - frontend server-side semplice da seguire;
-- ruoli separati ma stessa email ammessa su ruoli diversi;
-- niente seed nel deploy;
+- ruoli separati ed email univoca per ogni account;
+- dati campione presenti, ma nessun seed automatico;
 - template comuni per evitare duplicazioni;
 - commenti brevi solo dove aiutano la struttura.
 

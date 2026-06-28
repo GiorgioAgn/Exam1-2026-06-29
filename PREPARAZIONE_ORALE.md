@@ -18,7 +18,7 @@ Questo file serve per preparare la discussione orale del progetto. La prima part
 - Il codice deve essere scritto in modo leggibile e commentato solo dove serve.
 - Non devono essere implementate le funzioni opzionali da amministratore, perche non fanno parte dell'obiettivo scelto.
 
-Nota importante: il PDF chiede anche dati di esempio per permettere il test immediato. Nel progetto attuale il codice non contiene funzioni di seed e il sito e predisposto per partire vuoto. Per la consegna finale bisogna decidere se consegnare un `database.db` gia popolato manualmente tramite il sito e indicare le credenziali, oppure mantenere il database vuoto se questa e la scelta concordata per il deploy.
+Nota importante: il PDF chiede dati di esempio per permettere il test immediato. Il file `database.db` attuale contiene 2 guide, 4 partecipanti, 4 tour con schedule, lingue e durate differenti, oltre ad alcune prenotazioni. Il codice non contiene seed automatici: i dati sono stati creati tramite il sito. Nel README devono essere completate le password degli account campione.
 
 ### Requisiti Tecnici
 
@@ -65,12 +65,13 @@ Nota importante: il PDF chiede anche dati di esempio per permettere il test imme
 - Una guida deve indicare le lingue parlate.
 - Le lingue disponibili sono solo: Italian, English, Spanish, Portuguese, German.
 - L'email viene normalizzata per evitare duplicati causati da maiuscole o spazi.
+- L'email deve essere unica in tutta la tabella degli utenti.
 - Le password non devono essere salvate in chiaro.
 - Il login deve verificare email, password e ruolo.
 - Dopo login, se l'utente era stato mandato al login da una pagina protetta, deve tornare alla pagina richiesta.
 - I permessi devono essere controllati sulle route, non solo nella navbar.
 
-Scelta del progetto: la stessa email puo essere usata per creare un profilo guida e un profilo partecipante separato. Questo mantiene separati i permessi e permette a una persona reale di usare entrambi i ruoli senza mescolarli. Il vincolo applicato e `UNIQUE(email, role)`.
+Scelta del progetto: ogni account ha un solo ruolo e una sola email identificativa. Il vincolo `UNIQUE(email)` applica direttamente il requisito del testo d'esame.
 
 ### Requisiti Dei Tour
 
@@ -178,13 +179,13 @@ Vincolo logico aggiunto: un partecipante non puo avere due prenotazioni sovrappo
 
 | ID | Area | Test | Passaggi | Risultato atteso |
 | --- | --- | --- | --- | --- |
-| T01 | Avvio | Avvio applicazione | Eseguire `python db.py`, poi `python app.py` | Il sito risponde su `http://127.0.0.1:5000` |
-| T02 | Database vuoto | Stato iniziale | Aprire homepage e Tours dopo init DB | Non ci sono tour, ma la pagina mostra uno stato vuoto leggibile |
+| T01 | Avvio | Avvio applicazione | Eseguire `python app.py` usando il database incluso | Il sito risponde su `http://127.0.0.1:5000` |
+| T02 | Dati campione | Stato iniziale | Aprire homepage e Tours | Sono presenti guide, partecipanti, tour e prenotazioni campione |
 | T03 | Registrazione partecipante | Dati validi | Registrare nome, cognome, email, password, ruolo participant | Account creato, redirect al login |
 | T04 | Registrazione guida | Lingue mancanti | Registrare una guida senza selezionare lingue | Errore: una guida deve selezionare almeno una lingua |
 | T05 | Registrazione guida | Dati validi | Registrare guida con almeno una lingua | Account creato |
 | T06 | Duplicati | Stessa email stesso ruolo | Registrare due participant con la stessa email | Il secondo inserimento viene bloccato |
-| T07 | Duplicati | Stessa email ruolo diverso | Usare stessa email per guida e participant | Il progetto permette due account separati |
+| T07 | Duplicati | Stessa email ruolo diverso | Registrare una guida e poi un participant con la stessa email | Il secondo account viene bloccato |
 | T08 | Login | Ruolo sbagliato | Provare login con email participant ma ruolo guide | Login rifiutato |
 | T09 | Login | Credenziali corrette | Login con email, password e ruolo corretti | Sessione aperta e menu profilo visibile |
 | T10 | Logout | Uscita sessione | Cliccare Log out | Utente riportato alla homepage come visitatore |

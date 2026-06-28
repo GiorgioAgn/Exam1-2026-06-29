@@ -13,17 +13,13 @@ main h2,
 main h3 { 
   color: var(--brand-green-dark); 
   font-weight: 800; 
-  letter-spacing: -0.06rem;
+  letter-spacing: 0;
 }
 
 .tours-sidebar .accordion-item {
   border: 1px solid rgba(31, 95, 59, 0.14);
   background: rgba(255, 255, 255, 0.72);
   box-shadow: var(--soft-shadow);
-}
-
-.tours-sidebar .accordion-item + .accordion-item {
-  margin-top: 12px;
 }
 
 .tours-sidebar .accordion-button {
@@ -40,16 +36,6 @@ main h3 {
 
 .tours-sidebar .accordion-button::after {
   background-size: 0.9rem;
-}
-
-.tours-sidebar .list-group-item {
-  background: transparent;
-  border-color: rgba(31, 95, 59, 0.1);
-  color: var(--text-main);
-}
-
-.tours-sidebar .list-group-item:hover {
-  background: rgba(31, 95, 59, 0.05);
 }
 
 .tour-card {

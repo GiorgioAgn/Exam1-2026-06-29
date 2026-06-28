@@ -19,7 +19,7 @@ CREATE TABLE users (
     role TEXT NOT NULL CHECK (role IN ('guide', 'participant')),
     languages TEXT,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (email, role)
+    UNIQUE (email)
 );
 
 CREATE TABLE tours (

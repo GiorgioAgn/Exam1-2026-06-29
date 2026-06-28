@@ -20,7 +20,7 @@
     </div>
   </header>
 
-  <section class="profile-list">
+  <div class="profile-list">
     {% for tour in tours %}
       <article class="profile-card">
         <div class="profile-card-main">
@@ -44,7 +44,7 @@
         <div class="reservation-block mt-4">
           <h3 class="h6 fw-bold mb-3">Bookings by date</h3>
           {% for group in tour.reservation_dates %}
-            <section class="reservation-date">
+            <div class="reservation-date">
               <div class="reservation-date-head">
                 <div>
                   <p class="mb-1 fw-bold">{{ group.date }} at {{ group.start_time }}</p>
@@ -110,7 +110,7 @@
                   </div>
                 </form>
               {% endif %}
-            </section>
+            </div>
           {% else %}
             <p class="small text-muted mb-0">No bookings received for this tour.</p>
           {% endfor %}
@@ -123,6 +123,6 @@
         <a class="btn btn-dark rounded-pill px-4" href="{{ url_for('create_tour') }}">Plan tour</a>
       </div>
     {% endfor %}
-  </section>
+  </div>
 </main>
 {% endblock %}

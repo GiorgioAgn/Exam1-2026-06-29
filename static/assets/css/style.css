@@ -163,7 +163,7 @@ a {
   font-size: clamp(2.6rem, 7vw, 5.8rem);
   font-weight: 850;
   line-height: 0.92;
-  letter-spacing: -0.18rem;
+  letter-spacing: 0;
   color: var(--brand-green-dark);
 }
 
@@ -207,10 +207,6 @@ a {
 @media (max-width: 576px) {
   .homepage-intro {
     padding-top: 12px;
-  }
-
-  .homepage-title {
-    letter-spacing: -0.1rem;
   }
 
   .homepage-text {
